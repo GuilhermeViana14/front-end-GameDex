@@ -1,6 +1,5 @@
 import React from 'react';
-import avatar from '../assets/avatar-perfil.png'
-
+import avatar from '../assets/avatar-perfil.png';
 
 function Header() {
   const headerStyle = {
@@ -20,13 +19,14 @@ function Header() {
     textDecoration: 'none',
     fontSize: '1.5rem',
     fontWeight: 'bold',
+    transition: 'transform 0.3s ease', // Transição suave para o efeito de escala
   };
 
   const navLinksStyle = {
     listStyle: 'none',
     display: 'flex',
     gap: '25px',
-    alignItems: 'center', 
+    alignItems: 'center',
     margin: 0,
     padding: 0,
   };
@@ -35,6 +35,7 @@ function Header() {
     color: 'white',
     textDecoration: 'none',
     fontSize: '1rem',
+    transition: 'all 0.3s ease',
   };
 
   const searchBarStyle = {
@@ -59,13 +60,25 @@ function Header() {
     borderRadius: '50%',
     border: '1px solid white',
     cursor: 'pointer',
+    transition: 'transform 0.3s ease',
   };
 
   return (
     <header style={headerStyle}>
       <nav style={navbarStyle}>
         <div className="logo">
-          <a href="/" style={logoStyle}>GameDex</a>
+          <a
+            href="/"
+            style={logoStyle}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'scale(1.2)'; // Apenas aumenta o tamanho
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'scale(1)'; // Volta ao tamanho original
+            }}
+          >
+            GameDex
+          </a>
         </div>
         <div style={searchBarStyle}>
           <input
@@ -75,19 +88,54 @@ function Header() {
           />
         </div>
         <ul style={navLinksStyle}>
-        <li>
+          <li>
             <img
-              src={avatar}  
+              src={avatar}
               alt="Profile Avatar"
               style={avatarStyle}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'scale(1.2)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'scale(1)';
+              }}
             />
           </li>
-          
           <li>
-            <a href="/" style={linkStyle}>Login</a>
+            <a
+              href="/"
+              style={linkStyle}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'scale(1.1)';
+                e.target.style.color = '#FFFFFF';
+                e.target.style.textShadow = '0 0 10px #FFFFFF';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.color = 'white';
+                e.target.style.textShadow = 'none';
+              }}
+            >
+              Login
+            </a>
           </li>
           <li>
-            <a href="/about" style={linkStyle}>Cadastro</a>
+            <a
+              href="/about"
+              style={linkStyle}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'scale(1.1)';
+                e.target.style.color = '#FFFFFF';
+                e.target.style.textShadow = '0 0 10px #FFFFFF';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.color = 'white';
+                e.target.style.textShadow = 'none';
+              }}
+            >
+              Cadastro
+            </a>
           </li>
         </ul>
       </nav>
@@ -96,4 +144,3 @@ function Header() {
 }
 
 export default Header;
-
