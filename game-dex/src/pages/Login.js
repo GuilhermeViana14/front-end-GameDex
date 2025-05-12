@@ -1,8 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Para navegação
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   const containerStyle = {
     display: 'flex',
@@ -113,7 +113,12 @@ function Login() {
             <p style={forgotPasswordStyle}>Esqueceu a senha?</p>
           </div>
           <button style={loginButtonStyle}>Login</button>
-          <button style={registerButtonStyle}>Cadastrar</button>
+          <button
+            style={registerButtonStyle}
+            onClick={() => navigate('/cadastro')}
+          >
+            Cadastrar
+          </button>
         </div>
       </div>
     </div>
