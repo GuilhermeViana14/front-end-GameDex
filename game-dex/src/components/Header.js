@@ -103,7 +103,7 @@ function Header() {
           </li>
           <li>
             <a
-              href="/"
+              href="/login"
               style={linkStyle}
               onMouseOver={(e) => {
                 e.target.style.transform = 'scale(1.1)';
@@ -121,7 +121,7 @@ function Header() {
           </li>
           <li>
             <a
-              href="/about"
+              href="/cadastro"
               style={linkStyle}
               onMouseOver={(e) => {
                 e.target.style.transform = 'scale(1.1)';
