@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import SearchCard from '../components/searchCard'; // Importando o componente SearchCard
 
 const platformImages = {
   xbox: "/platform-icons/icons8-xbox-50.png",
@@ -31,6 +32,14 @@ const ListGames = () => {
   const [error, setError] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Update window width on resize
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchGames = () => {
@@ -67,65 +76,72 @@ const ListGames = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
+  const getGridColumns = () => {
+    if (windowWidth >= 1200) return "repeat(4, 1fr)";
+    if (windowWidth >= 768) return "repeat(3, 1fr)";
+    return "repeat(2, 1fr)";
+  };
+
   const styles = {
-    container: {
-      padding: "20px",
-      backgroundColor: "#1a1a1a",
-      color: "white",
-      maxWidth: "1500px",
-      width: "100%",
-      marginLeft: "300px",
-      marginTop: "10px",
-    },
-    gamesGrid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
-      gap: "30px",
-    },
-    gameCard: (isHovered) => ({
-      backgroundColor: "#2a2a2a",
-      borderRadius: "10px",
-      overflow: "hidden",
-      textAlign: "left",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-      transition: "transform 0.2s, box-shadow 0.2s",
-      transform: isHovered ? "scale(1.1)" : "scale(1)",
-      width: "100%",
-      maxWidth: "426px",
-      height: "327px",
-      display: "flex",
-      flexDirection: "column",
-      position: "relative",
-    }),
-    gameImage: {
-      width: "100%",
-      height: "200px",
-      objectFit: "cover",
-      borderTopLeftRadius: "10px",
-      borderTopRightRadius: "10px",
-    },
-    cardContent: {
-      padding: "16px",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "flex-start",
-      height: "100%",
-    },
-    platformIcons: {
-      fontSize: "18px",
-      marginBottom: "8px",
-      display: "flex",
-      gap: "6px",
-    },
-    gameTitle: {
-      fontSize: "20px",
-      fontWeight: "bold",
-      margin: "0",
-      color: "#fff",
-      textAlign: "left",
-      lineHeight: "1.2",
-      wordBreak: "break-word",
-    },
+   container: {
+    padding: windowWidth >= 768 ? "20px" : "10px",
+    backgroundColor: "#1a1a1a",
+    color: "white",
+    maxWidth: "1500px",
+    width: windowWidth >= 768 ? "calc(100% - 300px)" : "100%", // Ajusta a largura dinamicamente
+    marginLeft: windowWidth >= 768 ? "300px" : "0", // Remove a margem em telas pequenas
+    marginTop: "10px",
+    boxSizing: "border-box",
+    overflowX: "hidden",
+  },
+  gamesGrid: {
+    display: "grid",
+    gridTemplateColumns: getGridColumns(),
+    gap: "20px",
+  },
+  gameCard: (isHovered) => ({
+    backgroundColor: "#2a2a2a",
+    borderRadius: "10px",
+    overflow: "hidden",
+    textAlign: "left",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    transform: isHovered ? "scale(1.05)" : "scale(1)",
+    width: "100%",
+    height: windowWidth >= 768 ? "327px" : "250px",
+    display: "flex",
+    flexDirection: "column",
+    position: "relative",
+  }),
+  gameImage: {
+    width: "100%",
+    height: windowWidth >= 768 ? "200px" : "150px",
+    objectFit: "cover",
+    borderTopLeftRadius: "10px",
+    borderTopRightRadius: "10px",
+  },
+  cardContent: {
+    padding: "16px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    height: "100%",
+  },
+  platformIcons: {
+    fontSize: "18px",
+    marginBottom: "8px",
+    display: "flex",
+    gap: "6px",
+  },
+  gameTitle: {
+    fontSize: windowWidth >= 768 ? "20px" : "16px", // Fonte menor em telas pequenas
+    fontWeight: "bold",
+    margin: "0",
+    color: "#fff",
+    textAlign: "left",
+    lineHeight: "1.2",
+    wordBreak: "break-word",
+  },
     addButton: {
       position: "absolute",
       bottom: "16px",
@@ -185,91 +201,88 @@ const ListGames = () => {
   }, []);
 
   return (
-    <div style={styles.container}>
-      {error && <p>{error}</p>}
-      <div style={styles.gamesGrid}>
-        {games.map((game) => {
-          // Filtrar plataformas duplicadas
-          const uniquePlatforms = [];
-          const seen = new Set();
-          if (game.platforms) {
-            game.platforms.forEach((p) => {
-              const key = getPlatformKey(p.platform ? p.platform.name : p.name);
-              if (!seen.has(key)) {
-                seen.add(key);
-                uniquePlatforms.push(key);
-              }
-            });
-          }
-          return (
-            <div
-              key={game.id}
-              style={styles.gameCard(hoveredCard === game.id)}
-              onMouseOver={() => setHoveredCard(game.id)}
-              onMouseOut={() => setHoveredCard(null)}
-            >
-              <img
-                src={game.background_image}
-                alt={game.name}
-                style={styles.gameImage}
-              />
-              <div style={styles.cardContent}>
-                <div style={styles.platformIcons}>
-                  {uniquePlatforms.map((key) => (
-                    <img
-                      key={key}
-                      src={platformImages[key]}
-                      alt={key}
-                      style={{ width: 22, height: 22 }}
-                    />
-                  ))}
+    <><div>
+      <SearchCard />
+    </div><div style={styles.container}>
+        {error && <p>{error}</p>}
+        <div style={styles.gamesGrid}>
+          {games.map((game) => {
+            const uniquePlatforms = [];
+            const seen = new Set();
+            if (game.platforms) {
+              game.platforms.forEach((p) => {
+                const key = getPlatformKey(p.platform ? p.platform.name : p.name);
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  uniquePlatforms.push(key);
+                }
+              });
+            }
+            return (
+              <div
+                key={game.id}
+                style={styles.gameCard(hoveredCard === game.id)}
+                onMouseOver={() => setHoveredCard(game.id)}
+                onMouseOut={() => setHoveredCard(null)}
+              >
+                <img
+                  src={game.background_image}
+                  alt={game.name}
+                  style={styles.gameImage} />
+                <div style={styles.cardContent}>
+                  <div style={styles.platformIcons}>
+                    {uniquePlatforms.map((key) => (
+                      <img
+                        key={key}
+                        src={platformImages[key]}
+                        alt={key}
+                        style={{ width: 22, height: 22 }} />
+                    ))}
+                  </div>
+                  <div style={styles.gameTitle}>{game.name}</div>
                 </div>
-                <div style={styles.gameTitle}>{game.name}</div>
-              </div>
-              <button
-                className="add-btn"
-                style={{
-                  ...styles.addButton,
-                  textShadow:
-                    hoveredAddBtn === game.id
+                <button
+                  className="add-btn"
+                  style={{
+                    ...styles.addButton,
+                    textShadow: hoveredAddBtn === game.id
                       ? "0 0 12px #fff, 0 0 24px #fff"
                       : "none",
-                  transform:
-                    hoveredAddBtn === game.id
+                    transform: hoveredAddBtn === game.id
                       ? "scale(1.2)"
                       : "scale(1)",
-                }}
-                title="Adicionar"
-                onClick={() => alert(`Adicionar ${game.name}`)}
-                onMouseOver={() => setHoveredAddBtn(game.id)}
-                onMouseOut={() => setHoveredAddBtn(null)}
-              >
-                +
-              </button>
-            </div>
-          );
-        })}
-      </div>
-      {loading ? (
-        <div
-          style={{
-            textAlign: "center",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <div style={styles.loadingSpinner}></div>
-          <p>Carregando...</p>
+                  }}
+                  title="Adicionar"
+                  onClick={() => alert(`Adicionar ${game.name}`)}
+                  onMouseOver={() => setHoveredAddBtn(game.id)}
+                  onMouseOut={() => setHoveredAddBtn(null)}
+                >
+                  +
+                </button>
+              </div>
+            );
+          })}
         </div>
-      ) : (
-        <button style={styles.loadMoreButton} onClick={handleLoadMore}>
-          Carregar Mais
-        </button>
-      )}
-    </div>
+        {loading ? (
+          <div
+            style={{
+              textAlign: "center",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <div style={styles.loadingSpinner}></div>
+            <p>Carregando...</p>
+          </div>
+        ) : (
+          <button style={styles.loadMoreButton} onClick={handleLoadMore}>
+            Carregar Mais
+          </button>
+        )}
+      </div></>
   );
 };
 

@@ -13,10 +13,9 @@ const SearchCard = () => (
     flexDirection: "column",
     gap: "28px",
     position: "absolute",
-    left: "24px",
+    left: "5px",
     top: "150px",
     boxShadow: "0 2px 16px rgba(0,0,0,0.25)",
-    zIndex: 100
   }}>
     <div style={{ display: "flex", alignItems: "center", gap: "18px", marginBottom: "12px" }}>
       <FaUserCircle size={54} /> {/* ícone maior */}

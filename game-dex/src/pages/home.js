@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import ListGames from '../components/list_games'; // Importando o componente ListGames
-import SearchCard from '../components/searchCard'; // Importando o componente SearchCard
+
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const homeStyle = {
@@ -42,7 +42,7 @@ function Home() {
           Sua biblioteca de jogos
         </h2>
         <ListGames searchTerm={searchTerm} />
-        <SearchCard/>
+        
       </main>
     </div>
   );
