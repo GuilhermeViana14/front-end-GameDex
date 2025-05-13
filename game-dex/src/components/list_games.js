@@ -8,31 +8,35 @@ const ListGames = () => {
   const [hoveredCard, setHoveredCard] = useState(null); // Estado para rastrear o card em hover
 
   useEffect(() => {
-    const fetchGames = () => {
-      setLoading(true);
-      setError(null);
+  const fetchGames = () => {
+    setLoading(true);
+    setError(null);
 
-      fetch(`http://127.0.0.1:8000/api/games?page=${page}&page_size=20`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Erro na requisição");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setGames((prevGames) => [...prevGames, ...data.results]); // Adiciona os novos jogos à lista existente
-        })
-        .catch((err) => {
-          console.error("Erro na requisição:", err);
-          setError("Erro ao carregar jogos. Tente novamente.");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    };
+    fetch(`http://127.0.0.1:8000/api/games?page=${page}&page_size=20`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erro na requisição");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (page === 1) {
+          setGames(data.results); // Substitui ao carregar a primeira página
+        } else {
+          setGames((prevGames) => [...prevGames, ...data.results]); // Adiciona nas próximas páginas
+        }
+      })
+      .catch((err) => {
+        console.error("Erro na requisição:", err);
+        setError("Erro ao carregar jogos. Tente novamente.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
-    fetchGames();
-  }, [page]);
+  fetchGames();
+}, [page]);
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1); 
