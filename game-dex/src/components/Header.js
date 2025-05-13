@@ -1,8 +1,10 @@
-import React from 'react';
-import avatar from '../assets/avatar-perfil.png';
+import React, { useState } from "react";
+import avatar from "../assets/avatar-perfil.png";
 
-function Header() {
-  const headerStyle = {
+function Header({ searchTerm, setSearchTerm }) {
+  const [localSearchTerm, setLocalSearchTerm] = useState(""); // Estado local para o texto digitado
+
+ const headerStyle = {
     backgroundColor: '#1A1A1A',
     color: 'white',
     padding: '10px 20px',
@@ -63,6 +65,13 @@ function Header() {
     transition: 'transform 0.3s ease',
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Evita o comportamento padrão do Enter
+      setSearchTerm(localSearchTerm); // Atualiza o estado compartilhado com o valor local
+      console.log("Busca realizada:", localSearchTerm); // Substitua por qualquer ação desejada
+    }
+  };
   return (
     <header style={headerStyle}>
       <nav style={navbarStyle}>
@@ -84,10 +93,13 @@ function Header() {
           <input
             type="text"
             placeholder="Search games..."
+            value={localSearchTerm} // Vincula ao estado local
+            onChange={(e) => setLocalSearchTerm(e.target.value)} // Atualiza o estado local
+            onKeyDown={handleKeyDown} // Captura a tecla Enter
             style={inputStyle}
           />
         </div>
-        <ul style={navLinksStyle}>
+         <ul style={navLinksStyle}>
           <li>
             <img
               src={avatar}
