@@ -10,15 +10,16 @@ function Cadastro() {
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#D9D9D9',
+    padding: '20px', // Adicionado para evitar que o conteúdo encoste nas bordas em telas menores
   };
 
   const formContainerStyle = {
     backgroundColor: '#282828',
-    padding: '30px',
+    padding: '20px',
     borderRadius: '20px',
     boxShadow: '0 4px 8px #282828',
-    width: '400px',
-    height: '600px',
+    width: '90%', // Ajustado para ocupar 90% da largura da tela em dispositivos menores
+    maxWidth: '400px', // Limite máximo para telas maiores
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -27,7 +28,8 @@ function Cadastro() {
   };
 
   const inputStyle = {
-    width: '70%',
+    width: '100%', // Ajustado para ocupar toda a largura disponível
+    maxWidth: '300px', // Limite máximo para inputs
     padding: '10px',
     margin: '10px 0',
     fontSize: '1rem',
@@ -39,9 +41,10 @@ function Cadastro() {
   };
 
   const buttonStyle = {
-    width: '50%',
+    width: '100%', // Ajustado para ocupar toda a largura disponível
+    maxWidth: '200px', // Limite máximo para botões
     padding: '10px',
-    marginTop: '60px',
+    marginTop: '20px',
     borderRadius: '5px',
     border: 'none',
     fontSize: '1rem',
@@ -51,15 +54,8 @@ function Cadastro() {
   };
 
   const backButtonStyle = {
-    width: '50%',
-    padding: '10px',
-    margin: '20px 0 10px 0',
-    borderRadius: '5px',
-    border: 'none',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    backgroundColor: '#2C2C2C',
-    color: 'white',
+    ...buttonStyle,
+    marginTop: '10px', // Ajustado para menor espaçamento entre os botões
   };
 
   return (
@@ -71,8 +67,8 @@ function Cadastro() {
         <input type="text" placeholder="Nome" style={inputStyle} />
         <button style={buttonStyle}>Cadastrar</button>
         <button style={backButtonStyle} onClick={() => navigate('/')}>
-        Voltar
-      </button>
+          Voltar
+        </button>
       </div>
     </div>
   );
