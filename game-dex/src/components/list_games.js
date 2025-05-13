@@ -1,45 +1,70 @@
 import React, { useEffect, useState } from "react";
 
+const platformImages = {
+  xbox: "/platform-icons/icons8-xbox-50.png",
+  playstation: "/platform-icons/icons8-playstation-50.png",
+  pc: "/platform-icons/icons8-pc-50.png",
+  switch: "/platform-icons/icons8-nintendo-switch-handheld-50.png",
+  nintendo: "/platform-icons/icons8-nintendo-50.png",
+  android: "/platform-icons/icons8-android-50.png",
+  ios: "/platform-icons/icons8-ios-50.png",
+  default: "/platform-icons/icons8-default-32.png",
+};
+
+const getPlatformKey = (platformName) => {
+  if (!platformName) return "default";
+  const name = platformName.toLowerCase();
+  if (name.includes("playstation")) return "playstation";
+  if (name.includes("xbox")) return "xbox";
+  if (name.includes("pc")) return "pc";
+  if (name.includes("switch")) return "switch";
+  if (name.includes("nintendo")) return "nintendo";
+  if (name.includes("android")) return "android";
+  if (name.includes("ios")) return "ios";
+  return "default";
+};
+
 const ListGames = () => {
   const [games, setGames] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [hoveredCard, setHoveredCard] = useState(null); // Estado para rastrear o card em hover
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
 
   useEffect(() => {
-  const fetchGames = () => {
-    setLoading(true);
-    setError(null);
+    const fetchGames = () => {
+      setLoading(true);
+      setError(null);
 
-    fetch(`http://127.0.0.1:8000/api/games?page=${page}&page_size=20`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Erro na requisição");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (page === 1) {
-          setGames(data.results); // Substitui ao carregar a primeira página
-        } else {
-          setGames((prevGames) => [...prevGames, ...data.results]); // Adiciona nas próximas páginas
-        }
-      })
-      .catch((err) => {
-        console.error("Erro na requisição:", err);
-        setError("Erro ao carregar jogos. Tente novamente.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+      fetch(`http://127.0.0.1:8000/api/games?page=${page}&page_size=20`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Erro na requisição");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (page === 1) {
+            setGames(data.results);
+          } else {
+            setGames((prevGames) => [...prevGames, ...data.results]);
+          }
+        })
+        .catch((err) => {
+          console.error("Erro na requisição:", err);
+          setError("Erro ao carregar jogos. Tente novamente.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
 
-  fetchGames();
-}, [page]);
+    fetchGames();
+  }, [page]);
 
   const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1); 
+    setPage((prevPage) => prevPage + 1);
   };
 
   const styles = {
@@ -54,31 +79,71 @@ const ListGames = () => {
     },
     gamesGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)", 
+      gridTemplateColumns: "repeat(4, 1fr)",
       gap: "30px",
     },
     gameCard: (isHovered) => ({
       backgroundColor: "#2a2a2a",
       borderRadius: "10px",
       overflow: "hidden",
-      textAlign: "center",
+      textAlign: "left",
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
       transition: "transform 0.2s, box-shadow 0.2s",
       transform: isHovered ? "scale(1.1)" : "scale(1)",
       width: "100%",
       maxWidth: "426px",
       height: "327px",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative",
     }),
     gameImage: {
       width: "100%",
-      height: "250px",
+      height: "200px",
       objectFit: "cover",
+      borderTopLeftRadius: "10px",
+      borderTopRightRadius: "10px",
+    },
+    cardContent: {
+      padding: "16px",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      height: "100%",
+    },
+    platformIcons: {
+      fontSize: "18px",
+      marginBottom: "8px",
+      display: "flex",
+      gap: "6px",
     },
     gameTitle: {
-      fontSize: "16px",
+      fontSize: "20px",
       fontWeight: "bold",
-      margin: "10px 0",
+      margin: "0",
       color: "#fff",
+      textAlign: "left",
+      lineHeight: "1.2",
+      wordBreak: "break-word",
+    },
+    addButton: {
+      position: "absolute",
+      bottom: "16px",
+      right: "16px",
+      background: "none",
+      color: "#fff",
+      border: "none",
+      borderRadius: "0",
+      width: "auto",
+      height: "auto",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "32px",
+      cursor: "pointer",
+      boxShadow: "none",
+      transition: "color 0.2s, transform 0.2s, text-shadow 0.2s",
+      padding: 0,
     },
     loadMoreButton: {
       display: "block",
@@ -102,43 +167,88 @@ const ListGames = () => {
     },
   };
 
-  // Adicione a animação no estilo global (CSS-in-JS ou arquivo CSS separado)
-  const globalStyles = `
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  `;
-
-  // Adicione o estilo global ao documento
-  const styleSheet = document.createElement("style");
-  styleSheet.type = "text/css";
-  styleSheet.innerText = globalStyles;
-  document.head.appendChild(styleSheet);
+  // Estilos globais para animação do spinner
+  useEffect(() => {
+    const globalStyles = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = globalStyles;
+    document.head.appendChild(styleSheet);
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
 
   return (
     <div style={styles.container}>
       {error && <p>{error}</p>}
       <div style={styles.gamesGrid}>
-        {games.map((game) => (
-          <div
-            key={game.id}
-            style={styles.gameCard(hoveredCard === game.id)}
-            onMouseOver={() => setHoveredCard(game.id)} // Define o card em hover
-            onMouseOut={() => setHoveredCard(null)} // Remove o hover
-          >
-            <img
-              src={game.background_image}
-              alt={game.name}
-              style={styles.gameImage}
-            />
-            <h2 style={styles.gameTitle}>{game.name}</h2>
-          </div>
-        ))}
+        {games.map((game) => {
+          // Filtrar plataformas duplicadas
+          const uniquePlatforms = [];
+          const seen = new Set();
+          if (game.platforms) {
+            game.platforms.forEach((p) => {
+              const key = getPlatformKey(p.platform ? p.platform.name : p.name);
+              if (!seen.has(key)) {
+                seen.add(key);
+                uniquePlatforms.push(key);
+              }
+            });
+          }
+          return (
+            <div
+              key={game.id}
+              style={styles.gameCard(hoveredCard === game.id)}
+              onMouseOver={() => setHoveredCard(game.id)}
+              onMouseOut={() => setHoveredCard(null)}
+            >
+              <img
+                src={game.background_image}
+                alt={game.name}
+                style={styles.gameImage}
+              />
+              <div style={styles.cardContent}>
+                <div style={styles.platformIcons}>
+                  {uniquePlatforms.map((key) => (
+                    <img
+                      key={key}
+                      src={platformImages[key]}
+                      alt={key}
+                      style={{ width: 22, height: 22 }}
+                    />
+                  ))}
+                </div>
+                <div style={styles.gameTitle}>{game.name}</div>
+              </div>
+              <button
+                className="add-btn"
+                style={{
+                  ...styles.addButton,
+                  textShadow:
+                    hoveredAddBtn === game.id
+                      ? "0 0 12px #fff, 0 0 24px #fff"
+                      : "none",
+                  transform:
+                    hoveredAddBtn === game.id
+                      ? "scale(1.2)"
+                      : "scale(1)",
+                }}
+                title="Adicionar"
+                onClick={() => alert(`Adicionar ${game.name}`)}
+                onMouseOver={() => setHoveredAddBtn(game.id)}
+                onMouseOut={() => setHoveredAddBtn(null)}
+              >
+                +
+              </button>
+            </div>
+          );
+        })}
       </div>
       {loading ? (
         <div
