@@ -26,7 +26,7 @@ const SearchCard = () => (
         </div>
         <div style={{ display: "flex", alignItems: "center", fontSize: "16px", marginTop: "6px", color: "#ccc" }}>
           <FaCalendarAlt size={18} style={{ marginRight: "7px" }} />
-          My libery
+          My Library
         </div>
       </div>
     </div>
