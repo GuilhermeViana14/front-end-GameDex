@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import ListGames from '../components/list_games'; // Importando o componente ListGames
+import ListGames from '../components/list_games';
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,7 +18,7 @@ function Home() {
   return (
     <div>
       <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-       <main style={homeStyle}>
+      <main style={homeStyle}>
         <h1
           style={{
             alignSelf: 'flex-start',
@@ -42,7 +42,6 @@ function Home() {
           Sua biblioteca de jogos
         </h2>
         <ListGames searchTerm={searchTerm} />
-        
       </main>
     </div>
   );

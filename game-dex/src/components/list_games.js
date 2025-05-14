@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import SearchCard from '../components/searchCard'; // Importando o componente SearchCard
+import SearchCard from '../components/searchCard';
 
 const platformImages = {
   xbox: "/platform-icons/icons8-xbox-50.png",
@@ -25,7 +25,7 @@ const getPlatformKey = (platformName) => {
   return "default";
 };
 
-const ListGames = () => {
+const ListGames = ({ searchTerm }) => {
   const [games, setGames] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -34,114 +34,109 @@ const ListGames = () => {
   const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  // Update window width on resize
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    setPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     const fetchGames = () => {
       setLoading(true);
       setError(null);
 
-      fetch(`http://127.0.0.1:8000/api/games?page=${page}&page_size=20`)
+      let url = "";
+     if (searchTerm && searchTerm.trim() !== "") {
+        url = `http://127.0.0.1:8000/api/games/search?name=${encodeURIComponent(searchTerm)}&page=${page}&page_size=20`;
+      } else {
+        url = `http://127.0.0.1:8000/api/games?page=${page}&page_size=20`;
+      }
+
+      fetch(url)
         .then((response) => {
-          if (!response.ok) {
-            throw new Error("Erro na requisição");
-          }
+          if (!response.ok) throw new Error("Erro na requisição");
           return response.json();
         })
         .then((data) => {
-          if (page === 1) {
-            setGames(data.results);
-          } else {
-            setGames((prevGames) => [...prevGames, ...data.results]);
-          }
+          if (page === 1) setGames(data.results);
+          else setGames((prevGames) => [...prevGames, ...data.results]);
         })
-        .catch((err) => {
-          console.error("Erro na requisição:", err);
-          setError("Erro ao carregar jogos. Tente novamente.");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+        .catch(() => setError("Erro ao carregar jogos. Tente novamente."))
+        .finally(() => setLoading(false));
     };
 
     fetchGames();
-  }, [page]);
+  }, [page, searchTerm]);
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
   const getGridColumns = () => {
-    if (windowWidth >= 1200) return "repeat(4, 1fr)";
+    /* if (windowWidth >= 1200) return "repeat(4, 1fr)";
     if (windowWidth >= 768) return "repeat(3, 1fr)";
-    return "repeat(2, 1fr)";
+    return "repeat(2, 1fr)"; */
+    return "repeat(4, 1fr)";
   };
 
   const styles = {
-   container: {
-    padding: windowWidth >= 768 ? "20px" : "10px",
-    backgroundColor: "#1a1a1a",
-    color: "white",
-    maxWidth: "1500px",
-    width: windowWidth >= 768 ? "calc(100% - 300px)" : "100%", // Ajusta a largura dinamicamente
-    marginLeft: windowWidth >= 768 ? "300px" : "0", // Remove a margem em telas pequenas
-    marginTop: "10px",
-    boxSizing: "border-box",
-    overflowX: "hidden",
-  },
-  gamesGrid: {
-    display: "grid",
-    gridTemplateColumns: getGridColumns(),
-    gap: "20px",
-  },
-  gameCard: (isHovered) => ({
-    backgroundColor: "#2a2a2a",
-    borderRadius: "10px",
-    overflow: "hidden",
-    textAlign: "left",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    transition: "transform 0.2s, box-shadow 0.2s",
-    transform: isHovered ? "scale(1.05)" : "scale(1)",
-    width: "100%",
-    height: windowWidth >= 768 ? "327px" : "250px",
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-  }),
-  gameImage: {
-    width: "100%",
-    height: windowWidth >= 768 ? "200px" : "150px",
-    objectFit: "cover",
-    borderTopLeftRadius: "10px",
-    borderTopRightRadius: "10px",
-  },
-  cardContent: {
-    padding: "16px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    height: "100%",
-  },
-  platformIcons: {
-    fontSize: "18px",
-    marginBottom: "8px",
-    display: "flex",
-    gap: "6px",
-  },
-  gameTitle: {
-    fontSize: windowWidth >= 768 ? "20px" : "16px", // Fonte menor em telas pequenas
-    fontWeight: "bold",
-    margin: "0",
-    color: "#fff",
-    textAlign: "left",
-    lineHeight: "1.2",
-    wordBreak: "break-word",
-  },
+    container: {
+      padding: windowWidth >= 768 ? "20px" : "10px",
+      backgroundColor: "#1a1a1a",
+      color: "white",
+      maxWidth: "1500px",
+      width: windowWidth >= 768 ? "calc(100% - 300px)" : "100%",
+      marginLeft: windowWidth >= 768 ? "300px" : "0",
+      marginTop: "10px",
+      boxSizing: "border-box",
+      overflowX: "hidden",
+    },
+    gamesGrid: {
+      display: "grid",
+      gridTemplateColumns: getGridColumns(),
+      gap: "20px",
+    },
+    gameCard: (isHovered) => ({
+      backgroundColor: "#2a2a2a",
+      borderRadius: "10px",
+      overflow: "hidden",
+      textAlign: "left",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      transition: "transform 0.2s, box-shadow 0.2s",
+      transform: isHovered ? "scale(1.05)" : "scale(1)",
+      width: "100%",
+      height: windowWidth >= 768 ? "327px" : "250px",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative",
+    }),
+    gameImage: {
+      width: "100%",
+      height: windowWidth >= 768 ? "200px" : "150px",
+      objectFit: "cover",
+      borderTopLeftRadius: "10px",
+      borderTopRightRadius: "10px",
+    },
+    cardContent: {
+      padding: "16px",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      height: "100%",
+    },
+    platformIcons: {
+      fontSize: "18px",
+      marginBottom: "8px",
+      display: "flex",
+      gap: "6px",
+    },
+    gameTitle: {
+      fontSize: windowWidth >= 768 ? "20px" : "16px",
+      fontWeight: "bold",
+      margin: "0",
+      color: "#fff",
+      textAlign: "left",
+      lineHeight: "1.2",
+      wordBreak: "break-word",
+    },
     addButton: {
       position: "absolute",
       bottom: "16px",
@@ -183,7 +178,6 @@ const ListGames = () => {
     },
   };
 
-  // Estilos globais para animação do spinner
   useEffect(() => {
     const globalStyles = `
       @keyframes spin {
@@ -201,9 +195,11 @@ const ListGames = () => {
   }, []);
 
   return (
-    <><div>
-      <SearchCard />
-    </div><div style={styles.container}>
+    <>
+      <div>
+        <SearchCard />
+      </div>
+      <div style={styles.container}>
         {error && <p>{error}</p>}
         <div style={styles.gamesGrid}>
           {games.map((game) => {
@@ -282,7 +278,8 @@ const ListGames = () => {
             Carregar Mais
           </button>
         )}
-      </div></>
+      </div>
+    </>
   );
 };
 

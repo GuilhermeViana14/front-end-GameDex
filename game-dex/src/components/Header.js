@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import avatar from "../assets/avatar-perfil.png";
 
 function Header({ searchTerm, setSearchTerm }) {
-  const [localSearchTerm, setLocalSearchTerm] = useState(""); // Estado local para o texto digitado
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
 
- const headerStyle = {
+  const headerStyle = {
     backgroundColor: '#1A1A1A',
     color: 'white',
     padding: '10px 20px',
@@ -21,7 +21,7 @@ function Header({ searchTerm, setSearchTerm }) {
     textDecoration: 'none',
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    transition: 'transform 0.3s ease', // Transição suave para o efeito de escala
+    transition: 'transform 0.3s ease',
   };
 
   const navLinksStyle = {
@@ -67,11 +67,11 @@ function Header({ searchTerm, setSearchTerm }) {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // Evita o comportamento padrão do Enter
-      setSearchTerm(localSearchTerm); // Atualiza o estado compartilhado com o valor local
-      console.log("Busca realizada:", localSearchTerm); // Substitua por qualquer ação desejada
+      e.preventDefault();
+      setSearchTerm(localSearchTerm);
     }
   };
+
   return (
     <header style={headerStyle}>
       <nav style={navbarStyle}>
@@ -80,10 +80,10 @@ function Header({ searchTerm, setSearchTerm }) {
             href="/"
             style={logoStyle}
             onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.2)'; // Apenas aumenta o tamanho
+              e.target.style.transform = 'scale(1.2)';
             }}
             onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)'; // Volta ao tamanho original
+              e.target.style.transform = 'scale(1)';
             }}
           >
             GameDex
@@ -93,13 +93,13 @@ function Header({ searchTerm, setSearchTerm }) {
           <input
             type="text"
             placeholder="Search games..."
-            value={localSearchTerm} // Vincula ao estado local
-            onChange={(e) => setLocalSearchTerm(e.target.value)} // Atualiza o estado local
-            onKeyDown={handleKeyDown} // Captura a tecla Enter
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
             style={inputStyle}
           />
         </div>
-         <ul style={navLinksStyle}>
+        <ul style={navLinksStyle}>
           <li>
             <img
               src={avatar}
