@@ -44,7 +44,7 @@ const ListGames = ({ searchTerm }) => {
       setError(null);
 
       let url = "";
-     if (searchTerm && searchTerm.trim() !== "") {
+      if (searchTerm && searchTerm.trim() !== "") {
         url = `http://127.0.0.1:8000/api/games/search?name=${encodeURIComponent(searchTerm)}&page=${page}&page_size=20`;
       } else {
         url = `http://127.0.0.1:8000/api/games?page=${page}&page_size=20`;
@@ -71,9 +71,9 @@ const ListGames = ({ searchTerm }) => {
   };
 
   const getGridColumns = () => {
-    /* if (windowWidth >= 1200) return "repeat(4, 1fr)";
-    if (windowWidth >= 768) return "repeat(3, 1fr)";
-    return "repeat(2, 1fr)"; */
+    // if (windowWidth >= 1200) return "repeat(4, 1fr)";
+    // if (windowWidth >= 768) return "repeat(3, 1fr)";
+    // return "repeat(2, 1fr)";
     return "repeat(4, 1fr)";
   };
 
@@ -201,65 +201,7 @@ const ListGames = ({ searchTerm }) => {
       </div>
       <div style={styles.container}>
         {error && <p>{error}</p>}
-        <div style={styles.gamesGrid}>
-          {games.map((game) => {
-            const uniquePlatforms = [];
-            const seen = new Set();
-            if (game.platforms) {
-              game.platforms.forEach((p) => {
-                const key = getPlatformKey(p.platform ? p.platform.name : p.name);
-                if (!seen.has(key)) {
-                  seen.add(key);
-                  uniquePlatforms.push(key);
-                }
-              });
-            }
-            return (
-              <div
-                key={game.id}
-                style={styles.gameCard(hoveredCard === game.id)}
-                onMouseOver={() => setHoveredCard(game.id)}
-                onMouseOut={() => setHoveredCard(null)}
-              >
-                <img
-                  src={game.background_image}
-                  alt={game.name}
-                  style={styles.gameImage} />
-                <div style={styles.cardContent}>
-                  <div style={styles.platformIcons}>
-                    {uniquePlatforms.map((key) => (
-                      <img
-                        key={key}
-                        src={platformImages[key]}
-                        alt={key}
-                        style={{ width: 22, height: 22 }} />
-                    ))}
-                  </div>
-                  <div style={styles.gameTitle}>{game.name}</div>
-                </div>
-                <button
-                  className="add-btn"
-                  style={{
-                    ...styles.addButton,
-                    textShadow: hoveredAddBtn === game.id
-                      ? "0 0 12px #fff, 0 0 24px #fff"
-                      : "none",
-                    transform: hoveredAddBtn === game.id
-                      ? "scale(1.2)"
-                      : "scale(1)",
-                  }}
-                  title="Adicionar"
-                  onClick={() => alert(`Adicionar ${game.name}`)}
-                  onMouseOver={() => setHoveredAddBtn(game.id)}
-                  onMouseOut={() => setHoveredAddBtn(null)}
-                >
-                  +
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        {loading ? (
+        {loading && games.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -274,9 +216,85 @@ const ListGames = ({ searchTerm }) => {
             <p>Carregando...</p>
           </div>
         ) : (
-          <button style={styles.loadMoreButton} onClick={handleLoadMore}>
-            Carregar Mais
-          </button>
+          <>
+            <div style={styles.gamesGrid}>
+              {games.map((game) => {
+                const uniquePlatforms = [];
+                const seen = new Set();
+                if (game.platforms) {
+                  game.platforms.forEach((p) => {
+                    const key = getPlatformKey(p.platform ? p.platform.name : p.name);
+                    if (!seen.has(key)) {
+                      seen.add(key);
+                      uniquePlatforms.push(key);
+                    }
+                  });
+                }
+                return (
+                  <div
+                    key={game.id}
+                    style={styles.gameCard(hoveredCard === game.id)}
+                    onMouseOver={() => setHoveredCard(game.id)}
+                    onMouseOut={() => setHoveredCard(null)}
+                  >
+                    <img
+                      src={game.background_image}
+                      alt={game.name}
+                      style={styles.gameImage} />
+                    <div style={styles.cardContent}>
+                      <div style={styles.platformIcons}>
+                        {uniquePlatforms.map((key) => (
+                          <img
+                            key={key}
+                            src={platformImages[key]}
+                            alt={key}
+                            style={{ width: 22, height: 22 }} />
+                        ))}
+                      </div>
+                      <div style={styles.gameTitle}>{game.name}</div>
+                    </div>
+                    <button
+                      className="add-btn"
+                      style={{
+                        ...styles.addButton,
+                        textShadow: hoveredAddBtn === game.id
+                          ? "0 0 12px #fff, 0 0 24px #fff"
+                          : "none",
+                        transform: hoveredAddBtn === game.id
+                          ? "scale(1.2)"
+                          : "scale(1)",
+                      }}
+                      title="Adicionar"
+                      onClick={() => alert(`Adicionar ${game.name}`)}
+                      onMouseOver={() => setHoveredAddBtn(game.id)}
+                      onMouseOut={() => setHoveredAddBtn(null)}
+                    >
+                      +
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            {loading ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <div style={styles.loadingSpinner}></div>
+                <p>Carregando...</p>
+              </div>
+            ) : (
+              <button style={styles.loadMoreButton} onClick={handleLoadMore}>
+                Carregar Mais
+              </button>
+            )}
+          </>
         )}
       </div>
     </>

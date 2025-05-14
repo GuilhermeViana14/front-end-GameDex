@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import avatar from "../assets/avatar-perfil.png";
+import { FaSearch } from "react-icons/fa";
 
 function Header({ searchTerm, setSearchTerm }) {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
@@ -21,7 +22,8 @@ function Header({ searchTerm, setSearchTerm }) {
     textDecoration: 'none',
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    transition: 'transform 0.3s ease',
+    transition: 'transform 0.3s ease, text-shadow 0.3s ease',
+    display: 'inline-block'
   };
 
   const navLinksStyle = {
@@ -45,13 +47,31 @@ function Header({ searchTerm, setSearchTerm }) {
     margin: '0 20px',
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center'
+  };
+
+  // Para a lupa dentro do input
+  const inputWrapperStyle = {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '1400px',
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  const inputIconStyle = {
+    position: 'absolute',
+    left: '12px',
+    color: '#ccc',
+    fontSize: '1.1rem',
+    pointerEvents: 'none'
   };
 
   const inputStyle = {
     width: '100%',
     maxWidth: '1400px',
-    padding: '5px 10px',
-    borderRadius: '5px',
+    padding: '5px 10px 5px 34px', // espaço para a lupa
+    borderRadius: '10px',
     border: '1px solid #ccc',
     fontSize: '1rem',
   };
@@ -80,24 +100,29 @@ function Header({ searchTerm, setSearchTerm }) {
             href="/"
             style={logoStyle}
             onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.2)';
+              e.target.style.transform = 'scale(1.3)';
+              e.target.style.textShadow = 'none';
             }}
             onMouseOut={(e) => {
               e.target.style.transform = 'scale(1)';
+              e.target.style.textShadow = 'none';
             }}
           >
             GameDex
           </a>
         </div>
         <div style={searchBarStyle}>
-          <input
-            type="text"
-            placeholder="Search games..."
-            value={localSearchTerm}
-            onChange={(e) => setLocalSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            style={inputStyle}
-          />
+          <div style={inputWrapperStyle}>
+            <FaSearch style={inputIconStyle} />
+            <input
+              type="text"
+              placeholder="Search games..."
+              value={localSearchTerm}
+              onChange={(e) => setLocalSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={inputStyle}
+            />
+          </div>
         </div>
         <ul style={navLinksStyle}>
           <li>
