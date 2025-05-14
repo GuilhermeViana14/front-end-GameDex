@@ -1,8 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Cadastro() {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    senha: '',
+    confirmarSenha: '',
+    nome: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.senha !== formData.confirmarSenha) {
+      alert('As senhas não coincidem!');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/cadastro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: formData.nome,
+          email: formData.email,
+          password: formData.senha,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Cadastro realizado com sucesso!');
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        if (errorData.detail && errorData.detail.includes("Email already registered")) {
+          alert("Este e-mail já está cadastrado. Tente outro.");
+        } else {
+          alert(`Erro: ${errorData.detail || errorData.message || JSON.stringify(errorData)}`);
+        }
+      }
+    } catch (error) {
+      alert('Erro ao conectar com o servidor.');
+    }
+  };
 
   const containerStyle = {
     display: 'flex',
@@ -64,16 +111,46 @@ function Cadastro() {
 
   return (
     <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <input type="email" placeholder="E-mail" style={inputStyle} />
-        <input type="password" placeholder="Senha" style={inputStyle} />
-        <input type="password" placeholder="Confirmar Senha" style={inputStyle} />
-        <input type="text" placeholder="Nome" style={inputStyle} />
-        <button style={buttonStyle}>Cadastrar</button>
+      <form style={formContainerStyle} onSubmit={handleSubmit}>
+        <input
+          type="email"
+          name="email"
+          placeholder="E-mail"
+          style={inputStyle}
+          value={formData.email}
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          name="senha"
+          placeholder="Senha"
+          style={inputStyle}
+          value={formData.senha}
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          name="confirmarSenha"
+          placeholder="Confirmar Senha"
+          style={inputStyle}
+          value={formData.confirmarSenha}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="nome"
+          placeholder="Nome"
+          style={inputStyle}
+          value={formData.nome}
+          onChange={handleChange}
+        />
+        <button type="submit" style={buttonStyle}>
+          Cadastrar
+        </button>
         <button style={backButtonStyle} onClick={() => navigate('/')}>
-        Voltar
-      </button>
-      </div>
+          Voltar
+        </button>
+      </form>
     </div>
   );
 }

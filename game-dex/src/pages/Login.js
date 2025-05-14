@@ -1,8 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    senha: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.senha,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Login realizado com sucesso!');
+        console.log('Usuário logado:', data.user); // Exibe os dados do usuário no console
+        navigate(''); //TROCAR PARA A TELA DE PRINCIPAL SO QUE COM O LOGIN FEITO
+      } else {
+        const errorData = await response.json();
+        if (errorData.detail && errorData.detail.includes('Invalid email or password')) {
+          alert('E-mail ou senha inválidos. Tente novamente.');
+        } else {
+          alert(`Erro: ${errorData.detail || errorData.message || JSON.stringify(errorData)}`);
+        }
+      }
+    } catch (error) {
+      alert('Erro ao conectar com o servidor.');
+    }
+  };
 
   const containerStyle = {
     display: 'flex',
@@ -107,12 +149,30 @@ function Login() {
       </div>
       <div style={rightPanelStyle}>
         <div style={formContainerStyle}>
-          <div style={inputContainerStyle}>
-            <input type="email" placeholder="E-mail" style={inputStyle} />
-            <input type="password" placeholder="Senha" style={inputStyle} />
-            <p style={forgotPasswordStyle}>Esqueceu a senha?</p>
-          </div>
-          <button style={loginButtonStyle}>Login</button>
+          <form onSubmit={handleSubmit}>
+            <div style={inputContainerStyle}>
+              <input
+                type="email"
+                name="email"
+                placeholder="E-mail"
+                style={inputStyle}
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <input
+                type="password"
+                name="senha"
+                placeholder="Senha"
+                style={inputStyle}
+                value={formData.senha}
+                onChange={handleChange}
+              />
+              <p style={forgotPasswordStyle}>Esqueceu a senha?</p>
+            </div>
+            <button type="submit" style={loginButtonStyle}>
+              Login
+            </button>
+          </form>
           <button
             style={registerButtonStyle}
             onClick={() => navigate('/cadastro')}
