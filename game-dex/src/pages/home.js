@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import Header from '../components/Header';
+import React, { useState } from "react";
+import Header from "../components/Header";
+import { useAuth } from "../components/AuthContext";
 import ListGames from '../components/list_games';
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useAuth();
+
   const homeStyle = {
     textAlign: 'left',
     margin: '0',  

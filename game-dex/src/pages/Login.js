@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../components/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     senha: '',
@@ -30,9 +32,9 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
+        login(data.user); // Salva usuário no contexto
         alert('Login realizado com sucesso!');
-        console.log('Usuário logado:', data.user); // Exibe os dados do usuário no console
-        navigate(''); //TROCAR PARA A TELA DE PRINCIPAL SO QUE COM O LOGIN FEITO
+        navigate('/'); // Redireciona para home
       } else {
         const errorData = await response.json();
         if (errorData.detail && errorData.detail.includes('Invalid email or password')) {
@@ -139,7 +141,7 @@ function Login() {
     color: 'white',
   };
 
-  return (
+   return (
     <div style={containerStyle}>
       <button style={backButtonStyle} onClick={() => navigate('/')}>
         Voltar

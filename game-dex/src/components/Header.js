@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import avatar from "../assets/avatar-perfil.png";
 import { FaSearch } from "react-icons/fa";
+import { useAuth } from "../components/AuthContext";
 
 function Header({ searchTerm, setSearchTerm }) {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
+  const { user, logout } = useAuth();
 
   const headerStyle = {
     backgroundColor: '#1A1A1A',
@@ -50,7 +52,6 @@ function Header({ searchTerm, setSearchTerm }) {
     alignItems: 'center'
   };
 
-  // Para a lupa dentro do input
   const inputWrapperStyle = {
     position: 'relative',
     width: '100%',
@@ -70,7 +71,7 @@ function Header({ searchTerm, setSearchTerm }) {
   const inputStyle = {
     width: '100%',
     maxWidth: '1400px',
-    padding: '5px 10px 5px 34px', // espaço para a lupa
+    padding: '5px 10px 5px 34px',
     borderRadius: '10px',
     border: '1px solid #ccc',
     fontSize: '1rem',
@@ -92,21 +93,24 @@ function Header({ searchTerm, setSearchTerm }) {
     }
   };
 
+  // Estados para animação
+  const [logoHover, setLogoHover] = useState(false);
+  const [avatarHover, setAvatarHover] = useState(false);
+  const [loginHover, setLoginHover] = useState(false);
+  const [cadastroHover, setCadastroHover] = useState(false);
+
   return (
     <header style={headerStyle}>
       <nav style={navbarStyle}>
         <div className="logo">
           <a
             href="/"
-            style={logoStyle}
-            onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.3)';
-              e.target.style.textShadow = 'none';
+            style={{
+              ...logoStyle,
+              transform: logoHover ? 'scale(1.3)' : 'scale(1)',
             }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.textShadow = 'none';
-            }}
+            onMouseOver={() => setLogoHover(true)}
+            onMouseOut={() => setLogoHover(false)}
           >
             GameDex
           </a>
@@ -129,51 +133,62 @@ function Header({ searchTerm, setSearchTerm }) {
             <img
               src={avatar}
               alt="Profile Avatar"
-              style={avatarStyle}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'scale(1.2)';
+              style={{
+                ...avatarStyle,
+                transform: avatarHover ? 'scale(1.2)' : 'scale(1)'
               }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'scale(1)';
-              }}
+              onMouseOver={() => setAvatarHover(true)}
+              onMouseOut={() => setAvatarHover(false)}
             />
           </li>
-          <li>
-            <a
-              href="/login"
-              style={linkStyle}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'scale(1.1)';
-                e.target.style.color = '#FFFFFF';
-                e.target.style.textShadow = '0 0 10px #FFFFFF';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.color = 'white';
-                e.target.style.textShadow = 'none';
-              }}
-            >
-              Login
-            </a>
-          </li>
-          <li>
-            <a
-              href="/cadastro"
-              style={linkStyle}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'scale(1.1)';
-                e.target.style.color = '#FFFFFF';
-                e.target.style.textShadow = '0 0 10px #FFFFFF';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.color = 'white';
-                e.target.style.textShadow = 'none';
-              }}
-            >
-              Cadastro
-            </a>
-          </li>
+          {user ? (
+            <>
+              <li style={{ color: "white", fontWeight: "bold" }}>
+                {user.nome || user.first_name || user.email}
+              </li>
+              <li>
+                <button
+                  style={{ ...linkStyle, background: "none", border: "none", cursor: "pointer" }}
+                  onClick={logout}
+                >
+                  Sair
+                </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <a
+                  href="/login"
+                  style={{
+                    ...linkStyle,
+                    transform: loginHover ? 'scale(1.1)' : 'scale(1)',
+                    color: loginHover ? '#FFFFFF' : 'white',
+                    textShadow: loginHover ? '0 0 10px #FFFFFF' : 'none'
+                  }}
+                  onMouseOver={() => setLoginHover(true)}
+                  onMouseOut={() => setLoginHover(false)}
+                >
+                  Login
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/cadastro"
+                  style={{
+                    ...linkStyle,
+                    transform: cadastroHover ? 'scale(1.1)' : 'scale(1)',
+                    color: cadastroHover ? '#FFFFFF' : 'white',
+                    textShadow: cadastroHover ? '0 0 10px #FFFFFF' : 'none'
+                  }}
+                  onMouseOver={() => setCadastroHover(true)}
+                  onMouseOut={() => setCadastroHover(false)}
+                >
+                  Cadastro
+                </a>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
     </header>
