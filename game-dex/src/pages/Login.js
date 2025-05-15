@@ -32,9 +32,10 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        login(data.user); // Salva usuário no contexto
+        // Ajuste: use access_token como token
+        login({ user: data.user, token: data.access_token });
         alert('Login realizado com sucesso!');
-        navigate('/'); // Redireciona para home
+        navigate('/');
       } else {
         const errorData = await response.json();
         if (errorData.detail && errorData.detail.includes('Invalid email or password')) {
@@ -141,7 +142,7 @@ function Login() {
     color: 'white',
   };
 
-   return (
+  return (
     <div style={containerStyle}>
       <button style={backButtonStyle} onClick={() => navigate('/')}>
         Voltar
