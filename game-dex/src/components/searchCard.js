@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaUserCircle, FaCalendarAlt, FaGamepad, FaLayerGroup, FaLaptopCode, FaTrophy, FaChartBar, FaCrown, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 // Substitua os caminhos das imagens pelos corretos do seu projeto
@@ -49,6 +50,8 @@ const checkedCheckboxStyle = {
 };
 
 const SearchCard = () => {
+  const navigate = useNavigate();
+
   // Plataformas
   const [showPlataformas, setShowPlataformas] = useState(false);
   const contentRefPlataformas = useRef(null);
@@ -125,7 +128,17 @@ const SearchCard = () => {
             <span style={{ marginRight: "18px", cursor: "pointer" }}>Login</span>
             <span style={{ cursor: "pointer" }}>Cadastro</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", fontSize: "16px", marginTop: "6px", color: "#ccc" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontSize: "16px",
+              marginTop: "6px",
+              color: "#ccc",
+              cursor: "pointer"
+            }}
+            onClick={() => navigate("/meus-jogos")}
+          >
             <FaCalendarAlt size={18} style={{ marginRight: "7px" }} />
             My Library
           </div>

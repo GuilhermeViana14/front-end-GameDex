@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SearchCard from '../components/searchCard';
+import { useAuth } from "../components/AuthContext";
 
 const platformImages = {
   xbox: "/platform-icons/icons8-xbox-50.png",
@@ -33,6 +34,8 @@ const ListGames = ({ searchTerm }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const { token, user } = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -69,6 +72,38 @@ const ListGames = ({ searchTerm }) => {
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
+  };
+
+ // Função para adicionar jogo ao usuário
+  const handleAddGame = async (game) => {
+    if (!user) {
+      alert("Você precisa estar logado para adicionar jogos.");
+      return;
+    }
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/users/${user.id}/games`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: game.name,
+          rawg_id: game.id,
+          background_img: game.background_image,
+          platforms: game.platforms
+          ? game.platforms.map(p => p.platform ? p.platform.name : p.name).join(', ')
+          : "",
+        }),
+      });
+      if (response.ok) {
+        alert(`Jogo "${game.name}" adicionado com sucesso!`);
+      } else {
+        alert('Erro ao adicionar jogo.');
+      }
+    } catch (error) {
+      alert('Erro ao conectar ao servidor.');
+    }
   };
 
   const getGridColumns = () => {
@@ -191,128 +226,129 @@ const ListGames = ({ searchTerm }) => {
       document.head.removeChild(styleSheet);
     };
   }, []);
-return (
-  <>
-    <div>
-      <SearchCard />
-    </div>
-    <div style={styles.container}>
-      {error && (
-        <p style={{ color: "#ff4d4f", textAlign: "center", fontWeight: "bold" }}>
-          {error}
-        </p>
-      )}
-      {loading && games.length === 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <div style={styles.loadingSpinner}></div>
-          <p>
-            {searchTerm && searchTerm.trim() !== ""
-              ? `Buscando por "${searchTerm}"...`
-              : "Carregando..."}
+
+  return (
+    <>
+      <div>
+        <SearchCard />
+      </div>
+      <div style={styles.container}>
+        {error && (
+          <p style={{ color: "#ff4d4f", textAlign: "center", fontWeight: "bold" }}>
+            {error}
           </p>
-        </div>
-      )}
-      {!loading && games.length === 0 && !error && (
-        <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: "40px", fontSize: "1.2rem", fontWeight: "bold" }}>
-          Nenhum jogo encontrado para sua busca.
-        </div>
-      )}
-      {games.length > 0 && (
-        <>
-          {/* GRADE DE JOGOS */}
-          <div style={styles.gamesGrid}>
-            {games.map((game) => {
-              const uniquePlatforms = [];
-              const seen = new Set();
-              if (game.platforms) {
-                game.platforms.forEach((p) => {
-                  const key = getPlatformKey(p.platform ? p.platform.name : p.name);
-                  if (!seen.has(key)) {
-                    seen.add(key);
-                    uniquePlatforms.push(key);
-                  }
-                });
-              }
-              return (
-                <div
-                  key={game.id}
-                  style={styles.gameCard(hoveredCard === game.id)}
-                  onMouseOver={() => setHoveredCard(game.id)}
-                  onMouseOut={() => setHoveredCard(null)}
-                >
-                  <img
-                    src={game.background_image}
-                    alt={game.name}
-                    style={styles.gameImage} />
-                  <div style={styles.cardContent}>
-                    <div style={styles.platformIcons}>
-                      {uniquePlatforms.map((key) => (
-                        <img
-                          key={key}
-                          src={platformImages[key]}
-                          alt={key}
-                          style={{ width: 22, height: 22 }} />
-                      ))}
-                    </div>
-                    <div style={styles.gameTitle}>{game.name}</div>
-                  </div>
-                  <button
-                    className="add-btn"
-                    style={{
-                      ...styles.addButton,
-                      textShadow: hoveredAddBtn === game.id
-                        ? "0 0 12px #fff, 0 0 24px #fff"
-                        : "none",
-                      transform: hoveredAddBtn === game.id
-                        ? "scale(1.2)"
-                        : "scale(1)",
-                    }}
-                    title="Adicionar"
-                    onClick={() => alert(`Adicionar ${game.name}`)}
-                    onMouseOver={() => setHoveredAddBtn(game.id)}
-                    onMouseOut={() => setHoveredAddBtn(null)}
-                  >
-                    +
-                  </button>
-                </div>
-              );
-            })}
+        )}
+        {loading && games.length === 0 && (
+          <div
+            style={{
+              textAlign: "center",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <div style={styles.loadingSpinner}></div>
+            <p>
+              {searchTerm && searchTerm.trim() !== ""
+                ? `Buscando por "${searchTerm}"...`
+                : "Carregando..."}
+            </p>
           </div>
-          {/* LOADING DO "CARREGAR MAIS" */}
-          {loading && (
-            <div
-              style={{
-                textAlign: "center",
-                color: "white",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "10px",
-              }}
-            >
-              <div style={styles.loadingSpinner}></div>
-              <p>Carregando...</p>
+        )}
+        {!loading && games.length === 0 && !error && (
+          <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: "40px", fontSize: "1.2rem", fontWeight: "bold" }}>
+            Nenhum jogo encontrado para sua busca.
+          </div>
+        )}
+        {games.length > 0 && (
+          <>
+            {/* GRADE DE JOGOS */}
+            <div style={styles.gamesGrid}>
+              {games.map((game) => {
+                const uniquePlatforms = [];
+                const seen = new Set();
+                if (game.platforms) {
+                  game.platforms.forEach((p) => {
+                    const key = getPlatformKey(p.platform ? p.platform.name : p.name);
+                    if (!seen.has(key)) {
+                      seen.add(key);
+                      uniquePlatforms.push(key);
+                    }
+                  });
+                }
+                return (
+                  <div
+                    key={game.id}
+                    style={styles.gameCard(hoveredCard === game.id)}
+                    onMouseOver={() => setHoveredCard(game.id)}
+                    onMouseOut={() => setHoveredCard(null)}
+                  >
+                    <img
+                      src={game.background_image}
+                      alt={game.name}
+                      style={styles.gameImage} />
+                    <div style={styles.cardContent}>
+                      <div style={styles.platformIcons}>
+                        {uniquePlatforms.map((key) => (
+                          <img
+                            key={key}
+                            src={platformImages[key]}
+                            alt={key}
+                            style={{ width: 22, height: 22 }} />
+                        ))}
+                      </div>
+                      <div style={styles.gameTitle}>{game.name}</div>
+                    </div>
+                    <button
+                      className="add-btn"
+                      style={{
+                        ...styles.addButton,
+                        textShadow: hoveredAddBtn === game.id
+                          ? "0 0 12px #fff, 0 0 24px #fff"
+                          : "none",
+                        transform: hoveredAddBtn === game.id
+                          ? "scale(1.2)"
+                          : "scale(1)",
+                      }}
+                      title="Adicionar"
+                      onClick={() => handleAddGame(game)}
+                      onMouseOver={() => setHoveredAddBtn(game.id)}
+                      onMouseOut={() => setHoveredAddBtn(null)}
+                    >
+                      +
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          )}
-          {!loading && (
-            <button style={styles.loadMoreButton} onClick={handleLoadMore}>
-              Carregar Mais
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  </>
-);
+            {/* LOADING DO "CARREGAR MAIS" */}
+            {loading && (
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <div style={styles.loadingSpinner}></div>
+                <p>Carregando...</p>
+              </div>
+            )}
+            {!loading && (
+              <button style={styles.loadMoreButton} onClick={handleLoadMore}>
+                Carregar Mais
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
 };
 
 export default ListGames;
