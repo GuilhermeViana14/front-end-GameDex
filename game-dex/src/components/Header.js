@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import avatar from "../assets/avatar-perfil.png";
+import { FaSearch } from "react-icons/fa";
+import { useAuth } from "../components/AuthContext";
 
 function Header({ searchTerm, setSearchTerm }) {
-  const [localSearchTerm, setLocalSearchTerm] = useState(""); // Estado local para o texto digitado
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
+  const { user, logout } = useAuth();
 
- const headerStyle = {
+  const headerStyle = {
     backgroundColor: '#1A1A1A',
     color: 'white',
     padding: '10px 20px',
@@ -21,7 +24,8 @@ function Header({ searchTerm, setSearchTerm }) {
     textDecoration: 'none',
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    transition: 'transform 0.3s ease', // Transição suave para o efeito de escala
+    transition: 'transform 0.3s ease, text-shadow 0.3s ease',
+    display: 'inline-block'
   };
 
   const navLinksStyle = {
@@ -45,13 +49,30 @@ function Header({ searchTerm, setSearchTerm }) {
     margin: '0 20px',
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center'
+  };
+
+  const inputWrapperStyle = {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '1400px',
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  const inputIconStyle = {
+    position: 'absolute',
+    left: '12px',
+    color: '#ccc',
+    fontSize: '1.1rem',
+    pointerEvents: 'none'
   };
 
   const inputStyle = {
     width: '100%',
     maxWidth: '1400px',
-    padding: '5px 10px',
-    borderRadius: '5px',
+    padding: '5px 10px 5px 34px',
+    borderRadius: '10px',
     border: '1px solid #ccc',
     fontSize: '1rem',
   };
@@ -67,88 +88,107 @@ function Header({ searchTerm, setSearchTerm }) {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // Evita o comportamento padrão do Enter
-      setSearchTerm(localSearchTerm); // Atualiza o estado compartilhado com o valor local
-      console.log("Busca realizada:", localSearchTerm); // Substitua por qualquer ação desejada
+      e.preventDefault();
+      setSearchTerm(localSearchTerm);
     }
   };
+
+  // Estados para animação
+  const [logoHover, setLogoHover] = useState(false);
+  const [avatarHover, setAvatarHover] = useState(false);
+  const [loginHover, setLoginHover] = useState(false);
+  const [cadastroHover, setCadastroHover] = useState(false);
+
   return (
     <header style={headerStyle}>
       <nav style={navbarStyle}>
         <div className="logo">
           <a
             href="/"
-            style={logoStyle}
-            onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.2)'; // Apenas aumenta o tamanho
+            style={{
+              ...logoStyle,
+              transform: logoHover ? 'scale(1.3)' : 'scale(1)',
             }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)'; // Volta ao tamanho original
-            }}
+            onMouseOver={() => setLogoHover(true)}
+            onMouseOut={() => setLogoHover(false)}
           >
             GameDex
           </a>
         </div>
         <div style={searchBarStyle}>
-          <input
-            type="text"
-            placeholder="Search games..."
-            value={localSearchTerm} // Vincula ao estado local
-            onChange={(e) => setLocalSearchTerm(e.target.value)} // Atualiza o estado local
-            onKeyDown={handleKeyDown} // Captura a tecla Enter
-            style={inputStyle}
-          />
+          <div style={inputWrapperStyle}>
+            <FaSearch style={inputIconStyle} />
+            <input
+              type="text"
+              placeholder="Search games..."
+              value={localSearchTerm}
+              onChange={(e) => setLocalSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={inputStyle}
+            />
+          </div>
         </div>
-         <ul style={navLinksStyle}>
+        <ul style={navLinksStyle}>
           <li>
             <img
               src={avatar}
               alt="Profile Avatar"
-              style={avatarStyle}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'scale(1.2)';
+              style={{
+                ...avatarStyle,
+                transform: avatarHover ? 'scale(1.2)' : 'scale(1)'
               }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'scale(1)';
-              }}
+              onMouseOver={() => setAvatarHover(true)}
+              onMouseOut={() => setAvatarHover(false)}
             />
           </li>
-          <li>
-            <a
-              href="/login"
-              style={linkStyle}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'scale(1.1)';
-                e.target.style.color = '#FFFFFF';
-                e.target.style.textShadow = '0 0 10px #FFFFFF';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.color = 'white';
-                e.target.style.textShadow = 'none';
-              }}
-            >
-              Login
-            </a>
-          </li>
-          <li>
-            <a
-              href="/cadastro"
-              style={linkStyle}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'scale(1.1)';
-                e.target.style.color = '#FFFFFF';
-                e.target.style.textShadow = '0 0 10px #FFFFFF';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.color = 'white';
-                e.target.style.textShadow = 'none';
-              }}
-            >
-              Cadastro
-            </a>
-          </li>
+          {user ? (
+            <>
+              <li style={{ color: "white", fontWeight: "bold" }}>
+                {user.nome || user.first_name || user.email}
+              </li>
+              <li>
+                <button
+                  style={{ ...linkStyle, background: "none", border: "none", cursor: "pointer" }}
+                  onClick={logout}
+                >
+                  Sair
+                </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <a
+                  href="/login"
+                  style={{
+                    ...linkStyle,
+                    transform: loginHover ? 'scale(1.1)' : 'scale(1)',
+                    color: loginHover ? '#FFFFFF' : 'white',
+                    textShadow: loginHover ? '0 0 10px #FFFFFF' : 'none'
+                  }}
+                  onMouseOver={() => setLoginHover(true)}
+                  onMouseOut={() => setLoginHover(false)}
+                >
+                  Login
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/cadastro"
+                  style={{
+                    ...linkStyle,
+                    transform: cadastroHover ? 'scale(1.1)' : 'scale(1)',
+                    color: cadastroHover ? '#FFFFFF' : 'white',
+                    textShadow: cadastroHover ? '0 0 10px #FFFFFF' : 'none'
+                  }}
+                  onMouseOver={() => setCadastroHover(true)}
+                  onMouseOut={() => setCadastroHover(false)}
+                >
+                  Cadastro
+                </a>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
     </header>
