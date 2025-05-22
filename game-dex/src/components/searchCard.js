@@ -49,7 +49,12 @@ const checkedCheckboxStyle = {
   background: "#fff",
 };
 
-const SearchCard = () => {
+const SearchCard = ({
+  checkedPlataformas, setCheckedPlataformas,
+  checkedGeneros, setCheckedGeneros,
+  checkedDevs, setCheckedDevs,
+  onFilterChange
+}) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -57,25 +62,37 @@ const SearchCard = () => {
   const [showPlataformas, setShowPlataformas] = useState(false);
   const contentRefPlataformas = useRef(null);
   const [maxHeightPlataformas, setMaxHeightPlataformas] = useState("0px");
-  const [checkedPlataformas, setCheckedPlataformas] = useState([]);
+  // REMOVA esta linha:
+  // const [checkedPlataformas, setCheckedPlataformas] = useState([]);
 
   // Gêneros
   const [showGeneros, setShowGeneros] = useState(false);
   const contentRefGeneros = useRef(null);
   const [maxHeightGeneros, setMaxHeightGeneros] = useState("0px");
-  const [checkedGeneros, setCheckedGeneros] = useState([]);
+  // REMOVA esta linha:
+  // const [checkedGeneros, setCheckedGeneros] = useState([]);
 
   // Desenvolvedores
   const [showDevs, setShowDevs] = useState(false);
   const contentRefDevs = useRef(null);
   const [maxHeightDevs, setMaxHeightDevs] = useState("0px");
-  const [checkedDevs, setCheckedDevs] = useState([]);
 
   // Top hover animation
   const [hoveredTop, setHoveredTop] = useState(null);
 
   // Hover para My Library
   const [hoveredLibrary, setHoveredLibrary] = useState(false);
+
+  // Chama callback sempre que filtros mudam
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange({
+        plataformas: checkedPlataformas,
+        generos: checkedGeneros,
+        devs: checkedDevs
+      });
+    }
+  }, [checkedPlataformas, checkedGeneros, checkedDevs, onFilterChange]);
 
   useEffect(() => {
     if (showPlataformas && contentRefPlataformas.current) {
@@ -151,7 +168,6 @@ const SearchCard = () => {
                 <FaCalendarAlt size={18} style={{ marginRight: "7px" }} />
                 My Library
               </div>
-             
             </>
           ) : (
             <div style={{ fontSize: "19px" }}>
