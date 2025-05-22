@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle, FaCalendarAlt, FaGamepad, FaLayerGroup, FaLaptopCode, FaTrophy, FaChartBar, FaCrown, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { useAuth } from "../components/AuthContext";
 
-// Substitua os caminhos das imagens pelos corretos do seu projeto
 const plataformas = [
   { name: "PC", icon: "/platform-icons/icons8-pc-50.png" },
   { name: "PlayStation", icon: "/platform-icons/icons8-playstation-50.png" },
@@ -51,6 +51,7 @@ const checkedCheckboxStyle = {
 
 const SearchCard = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   // Plataformas
   const [showPlataformas, setShowPlataformas] = useState(false);
@@ -72,6 +73,9 @@ const SearchCard = () => {
 
   // Top hover animation
   const [hoveredTop, setHoveredTop] = useState(null);
+
+  // Hover para My Library
+  const [hoveredLibrary, setHoveredLibrary] = useState(false);
 
   useEffect(() => {
     if (showPlataformas && contentRefPlataformas.current) {
@@ -124,24 +128,47 @@ const SearchCard = () => {
       <div style={{ display: "flex", alignItems: "center", gap: "18px", marginBottom: "12px" }}>
         <FaUserCircle size={54} />
         <div>
-          <div style={{ fontSize: "19px" }}>
-            <span style={{ marginRight: "18px", cursor: "pointer" }}>Login</span>
-            <span style={{ cursor: "pointer" }}>Cadastro</span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              fontSize: "16px",
-              marginTop: "6px",
-              color: "#ccc",
-              cursor: "pointer"
-            }}
-            onClick={() => navigate("/meus-jogos")}
-          >
-            <FaCalendarAlt size={18} style={{ marginRight: "7px" }} />
-            My Library
-          </div>
+          {user ? (
+            <>
+              <div style={{ fontSize: "19px", color: "#fff", fontWeight: "bold" }}>
+                {user.nome || user.first_name || user.email}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "16px",
+                  marginTop: "6px",
+                  color: "#ccc",
+                  cursor: "pointer",
+                  transition: "transform 0.2s",
+                  transform: hoveredLibrary ? "scale(1.1)" : "scale(1)"
+                }}
+                onClick={() => navigate("/meus-jogos")}
+                onMouseEnter={() => setHoveredLibrary(true)}
+                onMouseLeave={() => setHoveredLibrary(false)}
+              >
+                <FaCalendarAlt size={18} style={{ marginRight: "7px" }} />
+                My Library
+              </div>
+             
+            </>
+          ) : (
+            <div style={{ fontSize: "19px" }}>
+              <span
+                style={{ marginRight: "18px", cursor: "pointer" }}
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </span>
+              <span
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate("/cadastro")}
+              >
+                Cadastro
+              </span>
+            </div>
+          )}
         </div>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #444", margin: "10px 0" }} />
