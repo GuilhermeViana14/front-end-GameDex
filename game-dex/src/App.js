@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import { AuthProvider } from './components/AuthContext';
 import MyGames from './pages/Mygames';
+import Infogame from './pages/Infogame';
 import Header from './components/Header';
 
 function AppContent() {
@@ -22,6 +23,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/meus-jogos" element={<MyGames />} />
+        <Route path="/infogame" element={<Infogame />} />
       </Routes>
     </>
   );
