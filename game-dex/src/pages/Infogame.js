@@ -7,7 +7,7 @@ import { FaSearch } from "react-icons/fa";
 function Infogame() {
   const { user } = useAuth();
   const location = useLocation();
-  const game = location.state?.game; // Obtém os detalhes do jogo clicado
+  const game = location.state?.game;
   console.log(game);
 
   const [isEditing, setIsEditing] = React.useState(false);
@@ -17,33 +17,39 @@ function Infogame() {
 
   const handleSave = async () => {
     try {
+      console.log("Request body:", {
+        comment: comment || null,
+        rating: rating ? Number(rating) : null,
+        progress: progress || null,
+      });
       const response = await fetch(
-        `http://localhost:3000/users/${user.id}/games/${game.id}`,
+        `http://127.0.0.1:8000/api/users/${user.id}/games/${game.id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            progress,
-            rating: Number(rating),
-            comment,
+            comment: comment || null,
+            rating: rating ? Number(rating) : null,
+            progress: progress || null,
           }),
         }
       );
-  
+
       if (!response.ok) {
-        throw new Error("Erro ao atualizar jogo");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Erro ao atualizar jogo");
       }
-  
+
       const data = await response.json();
       console.log("Atualizado com sucesso:", data);
       setIsEditing(false);
     } catch (error) {
       console.error("Erro:", error);
     }
-  };   
-  
+  };
+
   const platformImages = {
     xbox: "/platform-icons/icons8-xbox-50.png",
     playstation: "/platform-icons/icons8-playstation-50.png",
@@ -114,7 +120,7 @@ function Infogame() {
       borderRadius: "10px",
       padding: "20px",
       display: "flex",
-      flexDirection: "row-reverse", // Move a imagem para a direita
+      flexDirection: "row-reverse",
       gap: "20px",
       marginBottom: "20px",
     },
@@ -126,10 +132,19 @@ function Infogame() {
     },
     gameInfo: {
       flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+    },
+    gameTitleRow: {
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "10px",
     },
     gameTitle: {
       fontSize: "1.8rem",
-      marginBottom: "10px",
+      marginBottom: 0,
+      marginRight: "12px",
     },
     gameText: {
       marginBottom: "5px",
@@ -144,6 +159,8 @@ function Infogame() {
       backgroundColor: "#1f1f1f",
       borderRadius: "10px",
       padding: "20px",
+      marginBottom: "20px",
+      position: "relative",
     },
     commentTitle: {
       fontSize: "1.5rem",
@@ -152,6 +169,51 @@ function Infogame() {
     commentText: {
       color: "#ccc",
       lineHeight: "1.5",
+    },
+    editBtn: {
+      background: "none",
+      border: "none",
+      color: "#fff",
+      cursor: "pointer",
+      fontSize: "1.1rem",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      padding: 0,
+      outline: "none",
+      transition: "color 0.2s",
+      marginLeft: "8px",
+    },
+    saveBtn: {
+      color: "#fff",
+      background: "#2d2d2d",
+      border: "none",
+      borderRadius: "6px",
+      padding: "6px 18px",
+      fontWeight: 500,
+      fontSize: "1rem",
+      cursor: "pointer",
+      marginRight: "12px",
+      marginTop: "12px",
+    },
+    cancelBtn: {
+      color: "#bbb",
+      background: "#222",
+      border: "none",
+      borderRadius: "6px",
+      padding: "6px 18px",
+      fontWeight: 500,
+      fontSize: "1rem",
+      cursor: "pointer",
+      marginTop: "12px",
+    },
+    inputEditing: {
+      backgroundColor: "#2d2d2d",
+      color: "#fff",
+      border: "1px solid #444",
+      borderRadius: "6px",
+      padding: "8px",
+      marginBottom: "10px",
     },
   };
 
@@ -184,14 +246,32 @@ function Infogame() {
         {/* Detalhes do jogo */}
         {game && (
           <>
-            <div style={styles.gameDetails}>
+            <div style={{ ...styles.gameDetails }}>
               <img
                 src={game.background_img || "https://via.placeholder.com/200"}
                 alt={game.name || "Imagem do jogo"}
                 style={styles.gameImage}
               />
               <div style={styles.gameInfo}>
-                <h3 style={styles.gameTitle}>{game.name}</h3>
+                <div style={styles.gameTitleRow}>
+                  <h3 style={styles.gameTitle}>{game.name}</h3>
+                  {!isEditing && (
+                    <button
+                      style={styles.editBtn}
+                      onClick={() => setIsEditing(true)}
+                      title="Editar"
+                    >
+                      <img
+                        src="/icons/icons8-edit-50 3.png"
+                        alt="Editar"
+                        style={{ width: "22px", height: "22px" }}
+                      />
+                      <span style={{ fontWeight: 400, fontSize: "1.1rem" }}>
+                        edit
+                      </span>
+                    </button>
+                  )}
+                </div>
 
                 {/* Exibir plataformas */}
                 <div style={styles.platformIcons}>
@@ -227,93 +307,81 @@ function Infogame() {
                 <p style={styles.gameText}>
                   Data de lançamento:{" "}
                   {game.release_date
-                    ? new Date(`${game.release_date}T00:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
+                    ? new Date(`${game.release_date}T00:00:00Z`).toLocaleDateString(
+                        "pt-BR",
+                        { timeZone: "UTC" }
+                      )
                     : "Desconhecida"}
                 </p>
 
-
-                <button
-                 onClick={() => setIsEditing(!isEditing)}
-                 style={{ marginBottom: "10px", cursor: "pointer" }}
-                >
-                 {isEditing ? "Cancelar" : "Editar informações"}
-                </button>
-
                 {/* Exibir progresso */}
                 {isEditing ? (
-                <input
-                  type="text"
-                  value={progress}
-                  onChange={(e) => setProgress(e.target.value)}
-                  placeholder="Progresso"
-                  style={styles.gameText}
-                />
-              ) : (
-                <p style={styles.gameText}>
-                   Progresso: {progress || "Nenhum progresso registrado"}
-                </p>
+                  <input
+                    type="text"
+                    value={progress}
+                    onChange={(e) => setProgress(e.target.value)}
+                    placeholder="Progresso"
+                    style={styles.inputEditing}
+                  />
+                ) : (
+                  <p style={styles.gameText}>
+                    Progresso: {progress || "Nenhum progresso registrado"}
+                  </p>
                 )}
-
-                <button
-                 onClick={() => setIsEditing(!isEditing)}
-                 style={{ marginBottom: "10px", cursor: "pointer" }}
-                >
-                 {isEditing ? "Cancelar" : "Editar informações"}
-                </button>
 
                 {/* Exibir rating */}
                 {isEditing ? (
-                <input
-                  type="number"
-                  value={rating}
-                  onChange={(e) => setRating(e.target.value)}
-                  placeholder="Avaliação"
-                  style={styles.gameText}
-                />
-              ) : (
-                <p style={styles.gameText}>
-                  Avaliação: {rating ? `${rating}/100` : "Sem avaliação"}
-                </p>
-              )}
-
+                  <input
+                    type="number"
+                    value={rating}
+                    onChange={(e) => setRating(e.target.value)}
+                    placeholder="Avaliação"
+                    style={styles.inputEditing}
+                  />
+                ) : (
+                  <p style={styles.gameText}>
+                    Avaliação: {rating ? `${rating}/100` : "Sem avaliação"}
+                  </p>
+                )}
               </div>
             </div>
 
-            <button
-                 onClick={() => setIsEditing(!isEditing)}
-                 style={{ marginBottom: "10px", cursor: "pointer" }}
-                >
-                 {isEditing ? "Cancelar" : "Editar informações"}
-                </button>
-                
             {/* Comentário */}
-            {isEditing ? (
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Comentário"
-              style={{ ...styles.commentText, minHeight: "80px" }}
-            />
-          ) : (
-            <p style={styles.commentText}>
-              {comment || "Nenhum comentário disponível para este jogo."}
-            </p>
-          )}
-          <button
-                onClick={handleSave}
-                style={{
-                  marginTop: "12px",
-                  padding: "10px 20px",
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Salvar
-           </button>
-
+            <div style={styles.commentSection}>
+              {isEditing ? (
+                <>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Comentário"
+                    style={{
+                      ...styles.inputEditing,
+                      minHeight: "80px",
+                    }}
+                  />
+                  <div>
+                    <button
+                      style={styles.saveBtn}
+                      onClick={handleSave}
+                      title="Salvar"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      style={styles.cancelBtn}
+                      onClick={() => setIsEditing(false)}
+                      title="Cancelar edição"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p style={styles.commentText}>
+                  {comment || "Nenhum comentário disponível para este jogo."}
+                </p>
+              )}
+            </div>
           </>
         )}
       </main>
