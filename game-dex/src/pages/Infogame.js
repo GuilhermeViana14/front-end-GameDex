@@ -10,6 +10,40 @@ function Infogame() {
   const game = location.state?.game; // Obtém os detalhes do jogo clicado
   console.log(game);
 
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [progress, setProgress] = React.useState(game?.progress || "");
+  const [rating, setRating] = React.useState(game?.rating || "");
+  const [comment, setComment] = React.useState(game?.comment || "");
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/${user.id}/games/${game.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            progress,
+            rating: Number(rating),
+            comment,
+          }),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar jogo");
+      }
+  
+      const data = await response.json();
+      console.log("Atualizado com sucesso:", data);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };   
+  
   const platformImages = {
     xbox: "/platform-icons/icons8-xbox-50.png",
     playstation: "/platform-icons/icons8-playstation-50.png",
@@ -197,26 +231,89 @@ function Infogame() {
                     : "Desconhecida"}
                 </p>
 
+
+                <button
+                 onClick={() => setIsEditing(!isEditing)}
+                 style={{ marginBottom: "10px", cursor: "pointer" }}
+                >
+                 {isEditing ? "Cancelar" : "Editar informações"}
+                </button>
+
                 {/* Exibir progresso */}
+                {isEditing ? (
+                <input
+                  type="text"
+                  value={progress}
+                  onChange={(e) => setProgress(e.target.value)}
+                  placeholder="Progresso"
+                  style={styles.gameText}
+                />
+              ) : (
                 <p style={styles.gameText}>
-                  Progresso: {game.progress || "Nenhum progresso registrado"}
+                   Progresso: {progress || "Nenhum progresso registrado"}
                 </p>
+                )}
+
+                <button
+                 onClick={() => setIsEditing(!isEditing)}
+                 style={{ marginBottom: "10px", cursor: "pointer" }}
+                >
+                 {isEditing ? "Cancelar" : "Editar informações"}
+                </button>
 
                 {/* Exibir rating */}
+                {isEditing ? (
+                <input
+                  type="number"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                  placeholder="Avaliação"
+                  style={styles.gameText}
+                />
+              ) : (
                 <p style={styles.gameText}>
-                  Avaliação: {game.rating ? `${game.rating}/100` : "Sem avaliação"}
+                  Avaliação: {rating ? `${rating}/100` : "Sem avaliação"}
                 </p>
+              )}
+
               </div>
             </div>
 
+            <button
+                 onClick={() => setIsEditing(!isEditing)}
+                 style={{ marginBottom: "10px", cursor: "pointer" }}
+                >
+                 {isEditing ? "Cancelar" : "Editar informações"}
+                </button>
+                
             {/* Comentário */}
-            <div style={styles.commentSection}>
-              <h3 style={styles.commentTitle}>Comentário</h3>
-              <p style={styles.commentText}>
-                {game.comment ||
-                  "Nenhum comentário disponível para este jogo."}
-              </p>
-            </div>
+            {isEditing ? (
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Comentário"
+              style={{ ...styles.commentText, minHeight: "80px" }}
+            />
+          ) : (
+            <p style={styles.commentText}>
+              {comment || "Nenhum comentário disponível para este jogo."}
+            </p>
+          )}
+          <button
+                onClick={handleSave}
+                style={{
+                  marginTop: "12px",
+                  padding: "10px 20px",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Salvar
+           </button>
+
           </>
         )}
       </main>
