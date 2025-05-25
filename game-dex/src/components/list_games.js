@@ -26,6 +26,51 @@ const getPlatformKey = (platformName) => {
   return "default";
 };
 
+// Mapa de nome para slug de gênero
+const generoSlugMap = {
+  "Ação": "action",
+  "Indie": "indie",
+  "Aventura": "adventure",
+  "RPG": "role-playing-games-rpg",
+  "Estratégia": "strategy",
+  "Shooter": "shooter",
+  "Casual": "casual",
+  "Simulação": "simulation",
+  "Puzzle": "puzzle",
+  "Arcade": "arcade",
+  "Platformer": "platformer",
+  "Massively Multiplayer": "massively-multiplayer",
+  "Racing": "racing",
+  "Esporte": "sports",
+  "Fighting": "fighting",
+  "Família": "family",
+  "Board Games": "board-games",
+  "Educacional": "educational",
+  "Card": "card"
+};
+
+// Mapa de nome para slug de desenvolvedor
+const devSlugMap = {
+  "Rockstar Games": "rockstar-games",
+  "Rockstar": "rockstar-games",
+  "Microsoft": "microsoft",
+  "Sony": "sony-interactive-entertainment",
+  "Nintendo": "nintendo",
+  "Ubisoft": "ubisoft"
+};
+
+// Mapa de família de plataformas para IDs
+const plataformaFamiliaMap = {
+  "PC": [4],
+  "PlayStation": [187, 18, 16, 15, 27, 19, 17], // PS5, PS4, PS3, PS2, PS1, PS Vita, PSP
+  "Xbox": [1, 186, 14, 80], // Xbox One, Series X, 360, Xbox
+  "Nintendo Switch": [7],
+  "Nintendo": [7, 8, 9, 13, 10, 11, 105, 83, 24, 43, 26, 79, 49], // Switch, 3DS, DS, DSi, Wii U, Wii, GameCube, N64, GBA, GBC, GB, SNES, NES
+  "Android": [21],
+  "iOS": [3],
+  // Adicione outras famílias se quiser
+};
+
 const ListGames = ({ searchTerm }) => {
   const [games, setGames] = useState([]);
   const [page, setPage] = useState(1);
@@ -35,75 +80,65 @@ const ListGames = ({ searchTerm }) => {
   const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+  // Filtros locais
+  const [checkedPlataformas, setCheckedPlataformas] = useState([]);
+  const [checkedGeneros, setCheckedGeneros] = useState([]);
+  const [checkedDevs, setCheckedDevs] = useState([]);
   const { token, user } = useAuth();
 
+  // Sempre que filtros mudam, reseta para página 1
+  useEffect(() => {
+  setPage(1);
+  setGames([]);      // Limpa a lista para mostrar o loading
+  setLoading(true);  // Mostra o loading imediatamente ao trocar filtro
+}, [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm]);
+
+  // Atualize a URL conforme os filtros
   useEffect(() => {
     setLoading(true);
-    setPage(1);
-  }, [searchTerm]);
+    setError(null);
 
-  useEffect(() => {
-    const fetchGames = () => {
-      setLoading(true);
-      setError(null);
+    let url = `http://127.0.0.1:8000/api/games/filter?page=${page}&page_size=20`;
 
-      let url = "";
-      if (searchTerm && searchTerm.trim() !== "") {
-        url = `http://127.0.0.1:8000/api/games/search?name=${encodeURIComponent(searchTerm)}&page=${page}&page_size=20`;
-      } else {
-        url = `http://127.0.0.1:8000/api/games?page=${page}&page_size=20`;
+    if (checkedGeneros.length > 0) {
+      const slug = generoSlugMap[checkedGeneros[0]] || checkedGeneros[0];
+      url += `&genre=${encodeURIComponent(slug)}`;
+    }
+    if (checkedDevs.length > 0) {
+      const devSlug = devSlugMap[checkedDevs[0]] || checkedDevs[0];
+      url += `&developer=${encodeURIComponent(devSlug)}`;
+    }
+    if (checkedPlataformas.length > 0) {
+      // Junta todos os IDs das famílias selecionadas
+      const allIds = checkedPlataformas
+        .flatMap(nome => plataformaFamiliaMap[nome] || [])
+        .join(",");
+      if (allIds) {
+        url += `&platform=${encodeURIComponent(allIds)}`;
       }
+    }
+    if (searchTerm && searchTerm.trim() !== "") {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
 
-      fetch(url)
-        .then((response) => {
-          if (!response.ok) throw new Error("Erro na requisição");
-          return response.json();
-        })
-        .then((data) => {
-          if (page === 1) setGames(data.results);
-          else setGames((prevGames) => [...prevGames, ...data.results]);
-        })
-        .catch(() => setError("Erro ao carregar jogos. Tente novamente."))
-        .finally(() => setLoading(false));
-    };
-
-    fetchGames();
-  }, [page, searchTerm]);
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error("Erro na requisição");
+        return response.json();
+      })
+      .then((data) => {
+        if (page === 1) {
+          setGames(data.results || []);
+        } else {
+          setGames(prev => [...prev, ...(data.results || [])]);
+        }
+      })
+      .catch(() => setError("Erro ao carregar jogos."))
+      .finally(() => setLoading(false));
+  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm]);
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
-  };
-
- // Função para adicionar jogo ao usuário
-  const handleAddGame = async (game) => {
-    if (!user) {
-      alert("Você precisa estar logado para adicionar jogos.");
-      return;
-    }
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/api/users/${user.id}/games`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: game.name,
-          rawg_id: game.id,
-          background_img: game.background_image,
-          platforms: game.platforms
-          ? game.platforms.map(p => p.platform ? p.platform.name : p.name).join(', ')
-          : "",
-        }),
-      });
-      if (response.ok) {
-        alert(`Jogo "${game.name}" adicionado com sucesso!`);
-      } else {
-        alert('Erro ao adicionar jogo.');
-      }
-    } catch (error) {
-      alert('Erro ao conectar ao servidor.');
-    }
   };
 
   const getGridColumns = () => {
@@ -227,10 +262,49 @@ const ListGames = ({ searchTerm }) => {
     };
   }, []);
 
+  // Função para adicionar jogo ao usuário
+  const handleAddGame = async (game) => {
+    if (!user) {
+      alert("Você precisa estar logado para adicionar jogos.");
+      return;
+    }
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/users/${user.id}/games`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: game.name,
+          rawg_id: game.id,
+          background_img: game.background_image,
+          platforms: game.platforms
+            ? game.platforms.map(p => p.platform ? p.platform.name : p.name).join(', ')
+            : "",
+        }),
+      });
+      if (response.ok) {
+        alert(`Jogo "${game.name}" adicionado com sucesso!`);
+      } else {
+        alert('Erro ao adicionar jogo.');
+      }
+    } catch (error) {
+      alert('Erro ao conectar ao servidor.');
+    }
+  };
+
   return (
     <>
       <div>
-        <SearchCard />
+        <SearchCard
+          checkedPlataformas={checkedPlataformas}
+          setCheckedPlataformas={setCheckedPlataformas}
+          checkedGeneros={checkedGeneros}
+          setCheckedGeneros={setCheckedGeneros}
+          checkedDevs={checkedDevs}
+          setCheckedDevs={setCheckedDevs}
+        />
       </div>
       <div style={styles.container}>
         {error && (
@@ -238,6 +312,7 @@ const ListGames = ({ searchTerm }) => {
             {error}
           </p>
         )}
+
         {loading && games.length === 0 && (
           <div
             style={{

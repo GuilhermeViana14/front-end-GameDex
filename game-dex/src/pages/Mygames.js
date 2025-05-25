@@ -40,8 +40,19 @@ function MyGames() {
   const [search, setSearch] = useState("");
   const [hoveredCard, setHoveredCard] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [checkedPlataformas, setCheckedPlataformas] = useState([]);
+  const [checkedGeneros, setCheckedGeneros] = useState([]);
+  const [checkedDevs, setCheckedDevs] = useState([]);
 
+
+  const getGridColumns = () => {
+    return "repeat(4, 1fr)";
+  };
+  
+  
   const navigate = useNavigate(); // Inicializa o useNavigate para navegação
+   
+
 
   useEffect(() => {
     if (!user) return;
@@ -159,7 +170,14 @@ function MyGames() {
   return (
     <>
       <div>
-        <SearchCard />
+        <SearchCard
+          checkedPlataformas={checkedPlataformas}
+          setCheckedPlataformas={setCheckedPlataformas}
+          checkedGeneros={checkedGeneros}
+          setCheckedGeneros={setCheckedGeneros}
+          checkedDevs={checkedDevs}
+          setCheckedDevs={setCheckedDevs}
+        />
       </div>
       <main style={styles.content}>
         <h2 style={styles.title}>My library</h2>
