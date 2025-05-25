@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../components/AuthContext";
 import SearchCard from "../components/searchCard";
 import { FaSearch } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom"; // Importa o useNavigate para navegação
 
 const platformImages = {
   xbox: "/platform-icons/icons8-xbox-50.png",
@@ -14,10 +14,10 @@ const platformImages = {
   ios: "/platform-icons/icons8-ios-50.png",
   default: "/platform-icons/icons8-default-32.png",
 };
-  
+
 const getGridColumns = () => {
-    return "repeat(4, 1fr)";
-  };
+  return "repeat(4, 1fr)";
+};
 
 const getPlatformKey = (platformName) => {
   if (!platformName) return "default";
@@ -40,8 +40,6 @@ function MyGames() {
   const [search, setSearch] = useState("");
   const [hoveredCard, setHoveredCard] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  
-
   const [checkedPlataformas, setCheckedPlataformas] = useState([]);
   const [checkedGeneros, setCheckedGeneros] = useState([]);
   const [checkedDevs, setCheckedDevs] = useState([]);
@@ -50,6 +48,12 @@ function MyGames() {
   const getGridColumns = () => {
     return "repeat(4, 1fr)";
   };
+  
+  
+  const navigate = useNavigate(); // Inicializa o useNavigate para navegação
+   
+
+
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -113,7 +117,7 @@ function MyGames() {
       width: "100%",
       marginLeft: "10px",
     },
-  gamesGrid: {
+    gamesGrid: {
       display: "grid",
       gridTemplateColumns: getGridColumns(),
       gap: "20px",
@@ -186,14 +190,22 @@ function MyGames() {
             type="text"
             placeholder="Search my library"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             style={styles.searchInput}
           />
         </div>
         {loading && <p>Carregando...</p>}
         {error && <p style={{ color: "#ff4d4f" }}>{error}</p>}
         {!loading && filteredGames.length === 0 && (
-          <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: "40px", fontSize: "1.2rem", fontWeight: "bold" }}>
+          <div
+            style={{
+              color: "#ff4d4f",
+              textAlign: "center",
+              marginTop: "40px",
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+            }}
+          >
             Você ainda não adicionou jogos.
           </div>
         )}
@@ -202,7 +214,7 @@ function MyGames() {
             {filteredGames.map((game) => {
               // Remove plataformas duplicadas
               const platformsArray = game.platforms
-                ? game.platforms.split(',').map(p => p.trim())
+                ? game.platforms.split(",").map((p) => p.trim())
                 : [];
               const uniquePlatforms = [];
               const seen = new Set();
@@ -220,8 +232,13 @@ function MyGames() {
                   style={styles.gameCard(hoveredCard === game.id)}
                   onMouseEnter={() => setHoveredCard(game.id)}
                   onMouseLeave={() => setHoveredCard(null)}
+                  onClick={() => navigate("/infogame", { state: { game } })} // Navega para a página Infogame
                 >
-                  <img src={game.background_img} alt={game.name} style={styles.gameImage} />
+                  <img
+                    src={game.background_img}
+                    alt={game.name}
+                    style={styles.gameImage}
+                  />
                   <div style={styles.cardContent}>
                     <div style={styles.platformIcons}>
                       {uniquePlatforms.map((key) => (
