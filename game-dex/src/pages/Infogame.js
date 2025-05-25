@@ -124,7 +124,14 @@ function Infogame() {
   return (
     <>
       <div>
-        <SearchCard />
+        <SearchCard
+          checkedPlataformas={[]}
+          setCheckedPlataformas={() => {}}
+          checkedGeneros={[]}
+          setCheckedGeneros={() => {}}
+          checkedDevs={[]}
+          setCheckedDevs={() => {}}
+        />
       </div>
       <main style={styles.content}>
         <h2 style={styles.title}>My library</h2>
