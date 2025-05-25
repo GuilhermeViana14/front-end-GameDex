@@ -49,6 +49,16 @@ const generoSlugMap = {
   "Card": "card"
 };
 
+// Mapa de nome para slug de desenvolvedor
+const devSlugMap = {
+  "Rockstar Games": "rockstar-games",
+  "Rockstar": "rockstar-games",
+  "Microsoft": "microsoft",
+  "Sony": "sony-interactive-entertainment",
+  "Nintendo": "nintendo",
+  "Ubisoft": "ubisoft"
+};
+
 // Mapa de família de plataformas para IDs
 const plataformaFamiliaMap = {
   "PC": [4],
@@ -76,6 +86,13 @@ const ListGames = ({ searchTerm }) => {
   const [checkedDevs, setCheckedDevs] = useState([]);
   const { token, user } = useAuth();
 
+  // Sempre que filtros mudam, reseta para página 1
+  useEffect(() => {
+  setPage(1);
+  setGames([]);      // Limpa a lista para mostrar o loading
+  setLoading(true);  // Mostra o loading imediatamente ao trocar filtro
+}, [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm]);
+
   // Atualize a URL conforme os filtros
   useEffect(() => {
     setLoading(true);
@@ -88,7 +105,8 @@ const ListGames = ({ searchTerm }) => {
       url += `&genre=${encodeURIComponent(slug)}`;
     }
     if (checkedDevs.length > 0) {
-      url += `&developer=${encodeURIComponent(checkedDevs[0])}`;
+      const devSlug = devSlugMap[checkedDevs[0]] || checkedDevs[0];
+      url += `&developer=${encodeURIComponent(devSlug)}`;
     }
     if (checkedPlataformas.length > 0) {
       // Junta todos os IDs das famílias selecionadas
@@ -109,7 +127,11 @@ const ListGames = ({ searchTerm }) => {
         return response.json();
       })
       .then((data) => {
-        setGames(data.results || []);
+        if (page === 1) {
+          setGames(data.results || []);
+        } else {
+          setGames(prev => [...prev, ...(data.results || [])]);
+        }
       })
       .catch(() => setError("Erro ao carregar jogos."))
       .finally(() => setLoading(false));
