@@ -50,6 +50,37 @@ function Infogame() {
     }
   };
 
+
+  const handleRemove = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/users/${user.id}/games/${game.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Erro ao remover jogo");
+      }
+
+      const data = await response.json();
+      console.log("Jogo removido com sucesso:", data);
+
+      // Redirecionar ou atualizar a interface após a remoção
+      alert("Jogo removido com sucesso!");
+      window.location.href = "/meus-jogos"; // Redireciona para a página inicial
+    } catch (error) {
+      console.error("Erro ao remover jogo:", error);
+      alert("Erro ao remover jogo. Tente novamente.");
+    }
+  };
+
+
   const platformImages = {
     xbox: "/platform-icons/icons8-xbox-50.png",
     playstation: "/platform-icons/icons8-playstation-50.png",
@@ -382,6 +413,23 @@ function Infogame() {
                 </p>
               )}
             </div>
+            <button
+            style={{
+              color: "#fff",
+              background: "#d9534f",
+              border: "none",
+              borderRadius: "6px",
+              padding: "6px 18px",
+              fontWeight: 500,
+              fontSize: "1rem",
+              cursor: "pointer",
+              marginTop: "12px",
+            }}
+            onClick={handleRemove}
+            title="Remover jogo"
+          >
+            Deletar
+          </button>
           </>
         )}
       </main>
