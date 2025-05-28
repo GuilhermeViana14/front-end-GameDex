@@ -77,6 +77,9 @@ const SearchCard = ({
   const contentRefDevs = useRef(null);
   const [maxHeightDevs, setMaxHeightDevs] = useState("0px");
 
+  // ✅ NOVO estado para o filtro "Melhor do ano"
+  const [bestofyear, setBestofyear] = useState(false);
+
   // Top hover animation
   const [hoveredTop, setHoveredTop] = useState(null);
 
@@ -84,15 +87,18 @@ const SearchCard = ({
   const [hoveredLibrary, setHoveredLibrary] = useState(false);
 
   // Chama callback sempre que filtros mudam
-  useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange({
-        plataformas: checkedPlataformas,
-        generos: checkedGeneros,
-        devs: checkedDevs
-      });
-    }
-  }, [checkedPlataformas, checkedGeneros, checkedDevs, onFilterChange]);
+ // ✅ useEffect atualizado para incluir bestoftheyear
+ useEffect(() => {
+  if (onFilterChange) {
+    console.log('Filtros atualizados:', { checkedPlataformas, checkedGeneros, checkedDevs, bestofyear });
+    onFilterChange({
+      plataformas: checkedPlataformas,
+      generos: checkedGeneros,
+      devs: checkedDevs,
+      bestofyear,
+    });
+  }
+}, [checkedPlataformas, checkedGeneros, checkedDevs, bestofyear, onFilterChange]);
 
   useEffect(() => {
     if (showPlataformas && contentRefPlataformas.current) {
@@ -348,8 +354,10 @@ const SearchCard = ({
             cursor: "pointer",
             fontSize: "18px",
             transition: "transform 0.2s",
-            transform: hoveredTop === "ano" ? "scale(1.1)" : "scale(1)"
+            transform: hoveredTop === "ano" ? "scale(1.1)" : "scale(1)",
+            color: bestofyear ? "#FFD700" : "#fff"  // muda a cor quando ativo
           }}
+          onClick={() => setBestofyear((prev) => !prev)} // <-- mover para este item
           onMouseEnter={() => setHoveredTop("ano")}
           onMouseLeave={() => setHoveredTop(null)}
         >

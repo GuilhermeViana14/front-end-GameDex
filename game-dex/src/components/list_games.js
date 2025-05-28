@@ -85,13 +85,14 @@ const ListGames = ({ searchTerm }) => {
   const [checkedGeneros, setCheckedGeneros] = useState([]);
   const [checkedDevs, setCheckedDevs] = useState([]);
   const { token, user } = useAuth();
+  const [bestOfYear, setBestOfYear] = useState(false); // ✅ Novo estado
 
   // Sempre que filtros mudam, reseta para página 1
   useEffect(() => {
   setPage(1);
   setGames([]);      // Limpa a lista para mostrar o loading
   setLoading(true);  // Mostra o loading imediatamente ao trocar filtro
-}, [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm]);
+},  [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear]); // ✅ Incluído
 
   // Atualize a URL conforme os filtros
   useEffect(() => {
@@ -121,6 +122,10 @@ const ListGames = ({ searchTerm }) => {
       url += `&search=${encodeURIComponent(searchTerm)}`;
     }
 
+    if (bestOfYear) {
+      url += `&best_of_year=true`; // ✅ Novo filtro na URL
+    }
+
     fetch(url)
       .then((response) => {
         if (!response.ok) throw new Error("Erro na requisição");
@@ -135,7 +140,7 @@ const ListGames = ({ searchTerm }) => {
       })
       .catch(() => setError("Erro ao carregar jogos."))
       .finally(() => setLoading(false));
-  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm]);
+  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear]); // ✅ Incluído
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
@@ -304,6 +309,8 @@ const ListGames = ({ searchTerm }) => {
           setCheckedGeneros={setCheckedGeneros}
           checkedDevs={checkedDevs}
           setCheckedDevs={setCheckedDevs}
+          bestOfYear={bestOfYear}             // ✅ Envia estado para o SearchCard
+          setBestOfYear={setBestOfYear}       // ✅ Envia função para alterar
         />
       </div>
       <div style={styles.container}>
