@@ -27,10 +27,11 @@ const getPlatformKey = (platformName) => {
   return "default";
 };
 
-const ListGames = ({ searchResults, loadingSearch  }) => {
+const ListGames = ({ searchResults, loadingSearch }) => {
   const [games, setGames] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
@@ -57,6 +58,7 @@ const ListGames = ({ searchResults, loadingSearch  }) => {
     // Busca por nome (searchResults) tem prioridade
     if (Array.isArray(searchResults)) {
       setLoading(false);
+      setIsInitialLoad(false);
       return;
     }
 
@@ -76,8 +78,10 @@ const ListGames = ({ searchResults, loadingSearch  }) => {
         .then((data) => {
           if (page === 1) {
             setGames(data.results || []);
+            setIsInitialLoad(true);
           } else {
             setGames((prev) => [...prev, ...(data.results || [])]);
+            // Não mexe no isInitialLoad aqui!
           }
         })
         .catch(() => setError("Erro ao carregar jogos com filtro."))
@@ -90,8 +94,10 @@ const ListGames = ({ searchResults, loadingSearch  }) => {
       .then((data) => {
         if (page === 1) {
           setGames(data.results || []);
+          setIsInitialLoad(true);
         } else {
           setGames((prev) => [...prev, ...(data.results || [])]);
+          // Não mexe no isInitialLoad aqui!
         }
       })
       .catch(() => setError("Erro ao carregar jogos."))
@@ -105,6 +111,7 @@ const ListGames = ({ searchResults, loadingSearch  }) => {
   }, []);
 
   const handleLoadMore = () => {
+    setIsInitialLoad(false); // <-- Corrige o bug do loading global na primeira paginação
     setPage((prevPage) => prevPage + 1);
   };
 
@@ -137,8 +144,8 @@ const ListGames = ({ searchResults, loadingSearch  }) => {
     }
   };
 
-  // Mostra loading sempre que estiver carregando (inclusive busca por nome)
-  if (loading || loadingSearch) {
+  // Mostra loading global só no carregamento inicial
+  if ((loading || loadingSearch) && isInitialLoad) {
     return (
       <div>
         <SearchCard
@@ -332,6 +339,21 @@ const ListGames = ({ searchResults, loadingSearch  }) => {
                 );
               })}
             </div>
+            {loading && !isInitialLoad && (
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <div style={styles.loadingSpinner}></div>
+                <p>Carregando...</p>
+              </div>
+            )}
             {!loading && (
               <button style={styles.loadMoreButton} onClick={handleLoadMore}>
                 Carregar Mais
