@@ -10,16 +10,35 @@ import Header from './components/Header';
 
 function AppContent() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState(null);
+  const [loadingSearch, setLoadingSearch] = useState(false); 
   const location = useLocation();
-
-  // Não mostrar Header nas rotas de login e cadastro
   const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro";
+
 
   return (
     <>
-      {!hideHeader && <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />}
+     {!hideHeader && (
+        <Header
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSearchResults={setSearchResults}
+          onLoading={setLoadingSearch}
+        />
+      )}
       <Routes>
-        <Route path="/" element={<Home searchTerm={searchTerm} setSearchTerm={setSearchTerm} />} />
+        <Route
+          path="/"
+          element={
+            <Home
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              searchResults={searchResults}
+              setSearchResults={setSearchResults}
+              onLoading={setLoadingSearch}
+            />
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/meus-jogos" element={<MyGames />} />
