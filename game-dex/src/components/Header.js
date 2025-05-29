@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import avatar from "../assets/avatar-perfil.png";
 import { FaSearch } from "react-icons/fa";
 import { useAuth } from "../components/AuthContext";
+import { searchGamesByName } from "../service/gameService";
 
-function Header({ searchTerm, setSearchTerm }) {
+
+function Header({ searchTerm, setSearchTerm, onSearchResults, onLoading  }) {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
   const { user, logout } = useAuth();
 
@@ -86,10 +88,20 @@ function Header({ searchTerm, setSearchTerm }) {
     transition: 'transform 0.3s ease',
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      setSearchTerm(localSearchTerm);
+      if (onLoading) onLoading(true); // INICIA LOADING
+      try {
+        const data = await searchGamesByName({ name: localSearchTerm, page: 1, page_size: 10 });
+        setSearchTerm(localSearchTerm);
+        if (onSearchResults) onSearchResults(Array.isArray(data.results) ? data.results : []);
+      } catch (error) {
+        alert("Erro ao buscar jogos por nome.");
+        if (onSearchResults) onSearchResults([]);
+      } finally {
+        if (onLoading) onLoading(false); // FINALIZA LOADING
+      }
     }
   };
 
@@ -122,7 +134,12 @@ function Header({ searchTerm, setSearchTerm }) {
               type="text"
               placeholder="Search games..."
               value={localSearchTerm}
-              onChange={(e) => setLocalSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setLocalSearchTerm(e.target.value);
+                if (e.target.value.trim() === "" && onSearchResults) {
+                  onSearchResults(null); // limpa busca ao apagar
+                }
+              }}
               onKeyDown={handleKeyDown}
               style={inputStyle}
             />

@@ -1,8 +1,9 @@
-import React from "react";
+import React , { useState }  from "react";
 import ListGames from '../components/list_games';
 
-function Home({ searchTerm, setSearchTerm }) {
-  const homeStyle = {
+function Home({ searchTerm, setSearchTerm, searchResults, setSearchResults, loadingSearch  }) {
+  
+   const homeStyle = {
     textAlign: 'left',
     margin: '0',  
     backgroundColor: '#1A1A1A',
@@ -38,7 +39,13 @@ function Home({ searchTerm, setSearchTerm }) {
         >
           Sua biblioteca de jogos
         </h2>
-        <ListGames searchTerm={searchTerm} />
+       <ListGames
+          searchTerm={searchTerm}
+          searchResults={searchResults}
+          setSearchResults={setSearchResults}
+          loadingSearch={loadingSearch} 
+          
+        />
       </main>
     </div>
   );
