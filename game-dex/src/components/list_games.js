@@ -26,7 +26,6 @@ const getPlatformKey = (platformName) => {
   return "default";
 };
 
-// Mapa de nome para slug de gênero
 const generoSlugMap = {
   "Ação": "action",
   "Indie": "indie",
@@ -49,7 +48,6 @@ const generoSlugMap = {
   "Card": "card"
 };
 
-// Mapa de nome para slug de desenvolvedor
 const devSlugMap = {
   "Rockstar Games": "rockstar-games",
   "Rockstar": "rockstar-games",
@@ -59,16 +57,14 @@ const devSlugMap = {
   "Ubisoft": "ubisoft"
 };
 
-// Mapa de família de plataformas para IDs
 const plataformaFamiliaMap = {
   "PC": [4],
-  "PlayStation": [187, 18, 16, 15, 27, 19, 17], // PS5, PS4, PS3, PS2, PS1, PS Vita, PSP
-  "Xbox": [1, 186, 14, 80], // Xbox One, Series X, 360, Xbox
+  "PlayStation": [187, 18, 16, 15, 27, 19, 17],
+  "Xbox": [1, 186, 14, 80],
   "Nintendo Switch": [7],
-  "Nintendo": [7, 8, 9, 13, 10, 11, 105, 83, 24, 43, 26, 79, 49], // Switch, 3DS, DS, DSi, Wii U, Wii, GameCube, N64, GBA, GBC, GB, SNES, NES
+  "Nintendo": [7, 8, 9, 13, 10, 11, 105, 83, 24, 43, 26, 79, 49],
   "Android": [21],
   "iOS": [3],
-  // Adicione outras famílias se quiser
 };
 
 const ListGames = ({ searchTerm }) => {
@@ -80,26 +76,35 @@ const ListGames = ({ searchTerm }) => {
   const [hoveredAddBtn, setHoveredAddBtn] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  // Filtros locais
   const [checkedPlataformas, setCheckedPlataformas] = useState([]);
   const [checkedGeneros, setCheckedGeneros] = useState([]);
   const [checkedDevs, setCheckedDevs] = useState([]);
+  const [bestOfYear, setBestOfYear] = useState(false);
+  const [popular2024, setPopular2024] = useState(false);
+
   const { token, user } = useAuth();
-  const [bestOfYear, setBestOfYear] = useState(false); // ✅ Novo estado
 
-  // Sempre que filtros mudam, reseta para página 1
+  // Funções para tornar os filtros mutuamente exclusivos
+  const toggleBestOfYear = (value) => {
+    setBestOfYear(value);
+    if (value) setPopular2024(false);
+  };
+
+  const togglePopular2024 = (value) => {
+    setPopular2024(value);
+    if (value) setBestOfYear(false);
+  };
+
   useEffect(() => {
-  setPage(1);
-  setGames([]);      // Limpa a lista para mostrar o loading
-  setLoading(true);  // Mostra o loading imediatamente ao trocar filtro
-},  [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear]); // ✅ Incluído
+    setPage(1);
+    setGames([]);
+    setLoading(true);
+  }, [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024]);
 
-  // Atualize a URL conforme os filtros
   useEffect(() => {
     setLoading(true);
     setError(null);
 
-    // ✅ Use URLSearchParams para construir a query
     const params = new URLSearchParams({
       page: page,
       page_size: 20
@@ -109,26 +114,29 @@ const ListGames = ({ searchTerm }) => {
       const slug = generoSlugMap[checkedGeneros[0]] || checkedGeneros[0];
       params.append('genre', slug);
     }
-    
+
     if (checkedDevs.length > 0) {
       const devSlug = devSlugMap[checkedDevs[0]] || checkedDevs[0];
       params.append('developer', devSlug);
     }
-    
+
     if (checkedPlataformas.length > 0) {
       const allIds = checkedPlataformas
         .flatMap(nome => plataformaFamiliaMap[nome] || [])
         .join(",");
       params.append('platform', allIds);
     }
-    
+
     if (searchTerm && searchTerm.trim() !== "") {
       params.append('search', searchTerm);
     }
-    
-    // ✅ Adicione o parâmetro corretamente
+
     if (bestOfYear) {
       params.append('best_of_year', 'true');
+    }
+
+    if (popular2024) {
+      params.append('popular_2024', 'true');
     }
 
     const url = `http://127.0.0.1:8000/api/games/filter?${params.toString()}`;
@@ -147,15 +155,9 @@ const ListGames = ({ searchTerm }) => {
       })
       .catch(() => setError("Erro ao carregar jogos."))
       .finally(() => setLoading(false));
-  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear]); // ✅ Incluído
+  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024]);
 
-  const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);
-  };
-
-  const getGridColumns = () => {
-    return "repeat(4, 1fr)";
-  };
+  const handleLoadMore = () => setPage(prev => prev + 1);
 
   const styles = {
     container: {
@@ -171,7 +173,7 @@ const ListGames = ({ searchTerm }) => {
     },
     gamesGrid: {
       display: "grid",
-      gridTemplateColumns: getGridColumns(),
+      gridTemplateColumns: "repeat(4, 1fr)",
       gap: "20px",
     },
     gameCard: (isHovered) => ({
@@ -224,17 +226,9 @@ const ListGames = ({ searchTerm }) => {
       background: "none",
       color: "#fff",
       border: "none",
-      borderRadius: "0",
-      width: "auto",
-      height: "auto",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
       fontSize: "32px",
       cursor: "pointer",
-      boxShadow: "none",
       transition: "color 0.2s, transform 0.2s, text-shadow 0.2s",
-      padding: 0,
     },
     loadMoreButton: {
       display: "block",
@@ -274,7 +268,6 @@ const ListGames = ({ searchTerm }) => {
     };
   }, []);
 
-  // Função para adicionar jogo ao usuário
   const handleAddGame = async (game) => {
     if (!user) {
       alert("Você precisa estar logado para adicionar jogos.");
@@ -316,44 +309,30 @@ const ListGames = ({ searchTerm }) => {
           setCheckedGeneros={setCheckedGeneros}
           checkedDevs={checkedDevs}
           setCheckedDevs={setCheckedDevs}
-          bestOfYear={bestOfYear}             // ✅ Passe o estado
-          setBestOfYear={setBestOfYear}       // ✅ Passe o setter
+          bestOfYear={bestOfYear}
+          setBestOfYear={toggleBestOfYear}
+          popular2024={popular2024}
+          setPopular2024={togglePopular2024}
         />
       </div>
       <div style={styles.container}>
-        {error && (
-          <p style={{ color: "#ff4d4f", textAlign: "center", fontWeight: "bold" }}>
-            {error}
-          </p>
-        )}
+        {error && <p style={{ color: "#ff4d4f", textAlign: "center" }}>{error}</p>}
 
         {loading && games.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
+          <div style={{ textAlign: "center", color: "white" }}>
             <div style={styles.loadingSpinner}></div>
-            <p>
-              {searchTerm && searchTerm.trim() !== ""
-                ? `Buscando por "${searchTerm}"...`
-                : "Carregando..."}
-            </p>
+            <p>{searchTerm ? `Buscando por "${searchTerm}"...` : "Carregando..."}</p>
           </div>
         )}
+
         {!loading && games.length === 0 && !error && (
-          <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: "40px", fontSize: "1.2rem", fontWeight: "bold" }}>
+          <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: "40px", fontWeight: "bold" }}>
             Nenhum jogo encontrado para sua busca.
           </div>
         )}
+
         {games.length > 0 && (
           <>
-            {/* GRADE DE JOGOS */}
             <div style={styles.gamesGrid}>
               {games.map((game) => {
                 const uniquePlatforms = [];
@@ -374,37 +353,27 @@ const ListGames = ({ searchTerm }) => {
                     onMouseOver={() => setHoveredCard(game.id)}
                     onMouseOut={() => setHoveredCard(null)}
                   >
-                    <img
-                      src={game.background_image}
-                      alt={game.name}
-                      style={styles.gameImage} />
+                    <img src={game.background_image} alt={game.name} style={styles.gameImage} />
                     <div style={styles.cardContent}>
                       <div style={styles.platformIcons}>
                         {uniquePlatforms.map((key) => (
-                          <img
-                            key={key}
-                            src={platformImages[key]}
-                            alt={key}
-                            style={{ width: 22, height: 22 }} />
+                          <img key={key} src={platformImages[key]} alt={key} style={{ width: 22, height: 22 }} />
                         ))}
                       </div>
                       <div style={styles.gameTitle}>{game.name}</div>
                     </div>
                     <button
-                      className="add-btn"
                       style={{
                         ...styles.addButton,
-                        textShadow: hoveredAddBtn === game.id
-                          ? "0 0 12px #fff, 0 0 24px #fff"
-                          : "none",
-                        transform: hoveredAddBtn === game.id
-                          ? "scale(1.2)"
-                          : "scale(1)",
+                        textShadow: hoveredAddBtn === game.id ? "0 0 12px #fff, 0 0 8px #fff" : "none",
+                        color: hoveredAddBtn === game.id ? "#3b82f6" : "#fff",
+                        transform: hoveredAddBtn === game.id ? "scale(1.1)" : "scale(1)"
                       }}
-                      title="Adicionar"
                       onClick={() => handleAddGame(game)}
                       onMouseOver={() => setHoveredAddBtn(game.id)}
                       onMouseOut={() => setHoveredAddBtn(null)}
+                      title="Adicionar à biblioteca"
+                      aria-label={`Adicionar o jogo ${game.name} à biblioteca`}
                     >
                       +
                     </button>
@@ -412,26 +381,17 @@ const ListGames = ({ searchTerm }) => {
                 );
               })}
             </div>
-            {/* LOADING DO "CARREGAR MAIS" */}
-            {loading && (
-              <div
-                style={{
-                  textAlign: "center",
-                  color: "white",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <div style={styles.loadingSpinner}></div>
-                <p>Carregando...</p>
-              </div>
-            )}
+
             {!loading && (
-              <button style={styles.loadMoreButton} onClick={handleLoadMore}>
-                Carregar Mais
+              <button onClick={handleLoadMore} style={styles.loadMoreButton}>
+                Carregar mais
               </button>
+            )}
+
+            {loading && (
+              <div style={{ textAlign: "center", margin: "20px 0" }}>
+                <div style={styles.loadingSpinner}></div>
+              </div>
             )}
           </>
         )}
