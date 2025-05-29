@@ -99,32 +99,39 @@ const ListGames = ({ searchTerm }) => {
     setLoading(true);
     setError(null);
 
-    let url = `http://127.0.0.1:8000/api/games/filter?page=${page}&page_size=20`;
+    // ✅ Use URLSearchParams para construir a query
+    const params = new URLSearchParams({
+      page: page,
+      page_size: 20
+    });
 
     if (checkedGeneros.length > 0) {
       const slug = generoSlugMap[checkedGeneros[0]] || checkedGeneros[0];
-      url += `&genre=${encodeURIComponent(slug)}`;
+      params.append('genre', slug);
     }
+    
     if (checkedDevs.length > 0) {
       const devSlug = devSlugMap[checkedDevs[0]] || checkedDevs[0];
-      url += `&developer=${encodeURIComponent(devSlug)}`;
+      params.append('developer', devSlug);
     }
+    
     if (checkedPlataformas.length > 0) {
-      // Junta todos os IDs das famílias selecionadas
       const allIds = checkedPlataformas
         .flatMap(nome => plataformaFamiliaMap[nome] || [])
         .join(",");
-      if (allIds) {
-        url += `&platform=${encodeURIComponent(allIds)}`;
-      }
+      params.append('platform', allIds);
     }
+    
     if (searchTerm && searchTerm.trim() !== "") {
-      url += `&search=${encodeURIComponent(searchTerm)}`;
+      params.append('search', searchTerm);
+    }
+    
+    // ✅ Adicione o parâmetro corretamente
+    if (bestOfYear) {
+      params.append('best_of_year', 'true');
     }
 
-    if (bestOfYear) {
-      url += `&best_of_year=true`; // ✅ Novo filtro na URL
-    }
+    const url = `http://127.0.0.1:8000/api/games/filter?${params.toString()}`;
 
     fetch(url)
       .then((response) => {
@@ -309,8 +316,8 @@ const ListGames = ({ searchTerm }) => {
           setCheckedGeneros={setCheckedGeneros}
           checkedDevs={checkedDevs}
           setCheckedDevs={setCheckedDevs}
-          bestOfYear={bestOfYear}             // ✅ Envia estado para o SearchCard
-          setBestOfYear={setBestOfYear}       // ✅ Envia função para alterar
+          bestOfYear={bestOfYear}             // ✅ Passe o estado
+          setBestOfYear={setBestOfYear}       // ✅ Passe o setter
         />
       </div>
       <div style={styles.container}>
