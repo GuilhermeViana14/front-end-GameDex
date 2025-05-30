@@ -53,8 +53,7 @@ const SearchCard = ({
   checkedPlataformas, setCheckedPlataformas,
   checkedGeneros, setCheckedGeneros,
   checkedDevs, setCheckedDevs,
-  bestOfYear,        // ✅ Novo prop recebido do pai
-  setBestOfYear      // ✅ Novo prop recebido do pai
+  onFilterChange
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -84,11 +83,16 @@ const SearchCard = ({
   // Hover para My Library
   const [hoveredLibrary, setHoveredLibrary] = useState(false);
 
- // Função para lidar com o clique no filtro "Melhor do Ano"
- const handleBestOfYearClick = () => {
-  const newValue = !bestOfYear;
-  setBestOfYear(newValue);
-};
+  // Chama callback sempre que filtros mudam
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange({
+        plataformas: checkedPlataformas,
+        generos: checkedGeneros,
+        devs: checkedDevs
+      });
+    }
+  }, [checkedPlataformas, checkedGeneros, checkedDevs, onFilterChange]);
 
   useEffect(() => {
     if (showPlataformas && contentRefPlataformas.current) {
@@ -344,10 +348,8 @@ const SearchCard = ({
             cursor: "pointer",
             fontSize: "18px",
             transition: "transform 0.2s",
-            transform: hoveredTop === "ano" ? "scale(1.1)" : "scale(1)",
-            color: bestOfYear ? "#FFD700" : "#fff"  // muda a cor quando ativo
+            transform: hoveredTop === "ano" ? "scale(1.1)" : "scale(1)"
           }}
-          onClick={handleBestOfYearClick}
           onMouseEnter={() => setHoveredTop("ano")}
           onMouseLeave={() => setHoveredTop(null)}
         >

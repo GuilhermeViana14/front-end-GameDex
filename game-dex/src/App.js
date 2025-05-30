@@ -7,13 +7,14 @@ import { AuthProvider } from './components/AuthContext';
 import MyGames from './pages/Mygames';
 import Infogame from './pages/Infogame';
 import Header from './components/Header';
+import ConfirmacaoCadastro from './pages/confirmacao_cadastro';
 
 function AppContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loadingSearch, setLoadingSearch] = useState(false); 
   const location = useLocation();
-  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro";
+  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro";
 
 
   return (
@@ -43,6 +44,7 @@ function AppContent() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/meus-jogos" element={<MyGames />} />
         <Route path="/infogame" element={<Infogame />} />
+        <Route path="/confirmacao-cadastro" element={<ConfirmacaoCadastro />} />
       </Routes>
     </>
   );
