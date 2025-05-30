@@ -58,7 +58,8 @@ const SearchCard = ({
   checkedGeneros, setCheckedGeneros,
   checkedDevs, setCheckedDevs,
   bestOfYear, setBestOfYear,
-  popular2024, setPopular2024 // ✅ Novas props
+  popular2024, setPopular2024,
+  bestOfAllTime, setBestOfAllTime 
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -86,6 +87,11 @@ const SearchCard = ({
   const handlePopular2024Click = () => {
     const newValue = !popular2024;
     setPopular2024(newValue);
+  };
+
+  const handleBestOfAllTimeClick = () => {
+    const newValue = !bestOfAllTime;
+    setBestOfAllTime(newValue);
   };
 
   useEffect(() => {
@@ -301,8 +307,10 @@ const SearchCard = ({
         <div
           style={{
             display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", fontSize: "18px",
-            transition: "transform 0.2s", transform: hoveredTop === "sempre" ? "scale(1.1)" : "scale(1)"
+            transition: "transform 0.2s", transform: hoveredTop === "sempre" ? "scale(1.1)" : "scale(1)",
+            color: bestOfAllTime ? "#FFD700" : "#fff"
           }}
+          onClick={handleBestOfAllTimeClick}
           onMouseEnter={() => setHoveredTop("sempre")}
           onMouseLeave={() => setHoveredTop(null)}
         >

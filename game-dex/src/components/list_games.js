@@ -81,6 +81,8 @@ const ListGames = ({ searchTerm }) => {
   const [checkedDevs, setCheckedDevs] = useState([]);
   const [bestOfYear, setBestOfYear] = useState(false);
   const [popular2024, setPopular2024] = useState(false);
+  const [bestOfAllTime, setBestOfAllTime] = useState(false);
+
 
   const { token, user } = useAuth();
 
@@ -88,18 +90,26 @@ const ListGames = ({ searchTerm }) => {
   const toggleBestOfYear = (value) => {
     setBestOfYear(value);
     if (value) setPopular2024(false);
+    if (value) setBestOfAllTime(false);
   };
 
   const togglePopular2024 = (value) => {
     setPopular2024(value);
     if (value) setBestOfYear(false);
+    if (value) setBestOfAllTime(false);
   };
+
+  const toggleBestOfAlltime = (value) => {
+    setBestOfAllTime(value);
+    if (value) setBestOfYear(false);
+    if (value) setPopular2024(false);
+  }
 
   useEffect(() => {
     setPage(1);
     setGames([]);
     setLoading(true);
-  }, [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024]);
+  }, [checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024, bestOfAllTime]);
 
   useEffect(() => {
     setLoading(true);
@@ -139,6 +149,10 @@ const ListGames = ({ searchTerm }) => {
       params.append('popular_2024', 'true');
     }
 
+    if (bestOfAllTime) {
+      params.append('best_of_all_time', 'true');
+    }
+
     const url = `http://127.0.0.1:8000/api/games/filter?${params.toString()}`;
 
     fetch(url)
@@ -155,7 +169,7 @@ const ListGames = ({ searchTerm }) => {
       })
       .catch(() => setError("Erro ao carregar jogos."))
       .finally(() => setLoading(false));
-  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024]);
+  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024, bestOfAllTime]);
 
   const handleLoadMore = () => setPage(prev => prev + 1);
 
@@ -313,6 +327,8 @@ const ListGames = ({ searchTerm }) => {
           setBestOfYear={toggleBestOfYear}
           popular2024={popular2024}
           setPopular2024={togglePopular2024}
+          bestOfAllTime={bestOfAllTime}
+          setBestOfAllTime={toggleBestOfAlltime}
         />
       </div>
       <div style={styles.container}>
