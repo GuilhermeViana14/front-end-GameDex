@@ -17,7 +17,7 @@ function AppContent() {
   const [loadingSearch, setLoadingSearch] = useState(false); 
   const location = useLocation();
 
-  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro" || location.pathname === "/reset-password";
+  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro" || location.pathname === "/reset-password" || location.pathname === "/forgotpassword";
 
 
   return (

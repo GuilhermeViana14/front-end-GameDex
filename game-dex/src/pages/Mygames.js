@@ -3,6 +3,7 @@ import { useAuth } from "../components/AuthContext";
 import SearchCard from "../components/searchCard";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { fetchUserGames } from "../service/gameService";
 
 const platformImages = {
   xbox: "/platform-icons/icons8-xbox-50.png",
@@ -51,28 +52,18 @@ function MyGames() {
   const [checkedDevs, setCheckedDevs] = useState([]);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!user) return;
-    setLoading(true);
-    fetch(`http://127.0.0.1:8000/api/users/${user.id}/games`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao buscar jogos do usuário");
-        return res.json();
-      })
-      .then((data) => setGames(data.games))
-      .catch(() => setError("Erro ao carregar seus jogos."))
-      .finally(() => setLoading(false));
-  }, [user, token]);
-
-  // Filtro de busca na biblioteca pessoal
   const filteredGames = games.filter((game) =>
-    game.name.toLowerCase().includes(search.toLowerCase())
-  );
+  game.name.toLowerCase().includes(search.toLowerCase())
+);
+
+useEffect(() => {
+  if (!user) return;
+  setLoading(true);
+  fetchUserGames({ userId: user.id, token })
+    .then((data) => setGames(data.games))
+    .catch(() => setError("Erro ao carregar seus jogos."))
+    .finally(() => setLoading(false));
+}, [user, token]);
 
   const styles = {
     content: {

@@ -161,3 +161,16 @@ export async function fetchUserGameDetail({ userId, gameId }) {
   if (!response.ok) throw new Error("Erro ao buscar detalhes do jogo");
   return response.json();
 }
+
+export async function fetchUserGames({ userId, token }) {
+  const response = await fetch(
+    `http://127.0.0.1:8000/api/users/${userId}/games`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!response.ok) throw new Error("Erro ao buscar jogos do usuário");
+  return response.json();
+}
