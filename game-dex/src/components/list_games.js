@@ -41,7 +41,7 @@ const ListGames = ({ searchResults, loadingSearch }) => {
   const [checkedPlataformas, setCheckedPlataformas] = useState([]);
   const [checkedGeneros, setCheckedGeneros] = useState([]);
   const [checkedDevs, setCheckedDevs] = useState([]);
-
+  const [bestOfYear, setBestOfYear] = useState(false);
   const styles = getStyles(windowWidth);
   const { token, user } = useAuth();
 
@@ -50,44 +50,44 @@ const ListGames = ({ searchResults, loadingSearch }) => {
     setPage(1);
   }, [checkedPlataformas, checkedGeneros, checkedDevs]);
 
-  // Lógica de busca/listagem
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    // Busca por nome (searchResults) tem prioridade
-    if (Array.isArray(searchResults)) {
-      setLoading(false);
-      setIsInitialLoad(false);
-      return;
-    }
+  // Busca por nome (searchResults) tem prioridade
+  if (Array.isArray(searchResults)) {
+    setLoading(false);
+    setIsInitialLoad(false);
+    return;
+  }
 
-    // Se algum filtro estiver ativo, usa fetchGames
-    if (
-      checkedPlataformas.length > 0 ||
-      checkedGeneros.length > 0 ||
-      checkedDevs.length > 0
-    ) {
-      fetchGames({
-        page,
-        checkedPlataformas,
-        checkedGeneros,
-        checkedDevs,
-        searchTerm: "",
+  // Se algum filtro estiver ativo, usa fetchGames
+  if (
+    checkedPlataformas.length > 0 ||
+    checkedGeneros.length > 0 ||
+    checkedDevs.length > 0 ||
+    bestOfYear // <-- Adicione esta linha
+  ) {
+    fetchGames({
+      page,
+      checkedPlataformas,
+      checkedGeneros,
+      checkedDevs,
+      searchTerm: "",
+      bestOfYear, // <-- Passe o novo filtro
+    })
+      .then((data) => {
+        if (page === 1) {
+          setGames(data.results || []);
+          setIsInitialLoad(true);
+        } else {
+          setGames((prev) => [...prev, ...(data.results || [])]);
+        }
       })
-        .then((data) => {
-          if (page === 1) {
-            setGames(data.results || []);
-            setIsInitialLoad(true);
-          } else {
-            setGames((prev) => [...prev, ...(data.results || [])]);
-            // Não mexe no isInitialLoad aqui!
-          }
-        })
-        .catch(() => setError("Erro ao carregar jogos com filtro."))
-        .finally(() => setLoading(false));
-      return;
-    }
+      .catch(() => setError("Erro ao carregar jogos com filtro."))
+      .finally(() => setLoading(false));
+    return;
+  }
 
     // Listagem padrão
     listGames({ page, page_size: 20 })
@@ -102,7 +102,7 @@ const ListGames = ({ searchResults, loadingSearch }) => {
       })
       .catch(() => setError("Erro ao carregar jogos."))
       .finally(() => setLoading(false));
-  }, [page, checkedPlataformas, checkedGeneros, checkedDevs, searchResults]);
+  },  [page, checkedPlataformas, checkedGeneros, checkedDevs, searchResults, bestOfYear]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -155,6 +155,8 @@ const ListGames = ({ searchResults, loadingSearch }) => {
           setCheckedGeneros={setCheckedGeneros}
           checkedDevs={checkedDevs}
           setCheckedDevs={setCheckedDevs}
+          bestOfYear={bestOfYear}
+          setBestOfYear={setBestOfYear}
         />
         <div style={styles.container}>
           <div
@@ -179,13 +181,15 @@ const ListGames = ({ searchResults, loadingSearch }) => {
   if (Array.isArray(searchResults)) {
     return (
       <div>
-        <SearchCard
+       <SearchCard
           checkedPlataformas={checkedPlataformas}
           setCheckedPlataformas={setCheckedPlataformas}
           checkedGeneros={checkedGeneros}
           setCheckedGeneros={setCheckedGeneros}
           checkedDevs={checkedDevs}
           setCheckedDevs={setCheckedDevs}
+          bestOfYear={bestOfYear}
+          setBestOfYear={setBestOfYear}
         />
         <div style={styles.container}>
           {searchResults.length === 0 ? (
@@ -260,13 +264,15 @@ const ListGames = ({ searchResults, loadingSearch }) => {
   // Renderização padrão (listagem paginada ou filtro)
   return (
     <div>
-      <SearchCard
+     <SearchCard
         checkedPlataformas={checkedPlataformas}
         setCheckedPlataformas={setCheckedPlataformas}
         checkedGeneros={checkedGeneros}
         setCheckedGeneros={setCheckedGeneros}
         checkedDevs={checkedDevs}
         setCheckedDevs={setCheckedDevs}
+        bestOfYear={bestOfYear}
+        setBestOfYear={setBestOfYear}
       />
       <div style={styles.container}>
         {error && (

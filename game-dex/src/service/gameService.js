@@ -15,7 +15,7 @@ export async function listGames({ page = 1, page_size = 10 }) {
   return response.json();
 }
 
-export async function fetchGames({ page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm }) {
+export async function fetchGames({ page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear }) {
   const generoSlugMap = {
     "Ação": "action",
     "Indie": "indie",
@@ -59,15 +59,15 @@ export async function fetchGames({ page, checkedPlataformas, checkedGeneros, che
 
   let url = `http://127.0.0.1:8000/api/games/filter?page=${page}&page_size=20`;
 
-  if (checkedGeneros.length > 0) {
+  if (checkedGeneros && checkedGeneros.length > 0) {
     const slug = generoSlugMap[checkedGeneros[0]] || checkedGeneros[0];
     url += `&genre=${encodeURIComponent(slug)}`;
   }
-  if (checkedDevs.length > 0) {
+  if (checkedDevs && checkedDevs.length > 0) {
     const devSlug = devSlugMap[checkedDevs[0]] || checkedDevs[0];
     url += `&developer=${encodeURIComponent(devSlug)}`;
   }
-  if (checkedPlataformas.length > 0) {
+  if (checkedPlataformas && checkedPlataformas.length > 0) {
     const allIds = checkedPlataformas
       .flatMap(nome => plataformaFamiliaMap[nome] || [])
       .join(",");
@@ -77,6 +77,9 @@ export async function fetchGames({ page, checkedPlataformas, checkedGeneros, che
   }
   if (searchTerm && searchTerm.trim() !== "") {
     url += `&search=${encodeURIComponent(searchTerm)}`;
+  }
+  if (bestOfYear) {
+    url += `&best_of_year=true`;
   }
 
   const response = await fetch(url);
