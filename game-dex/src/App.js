@@ -48,7 +48,7 @@ function AppContent() {
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/meus-jogos" element={<MyGames />} />
-        <Route path="/infogame" element={<Infogame />} />
+        <Route path="/infogame/:gameId" element={<Infogame />} />
         <Route path="/confirmacao-cadastro" element={<ConfirmacaoCadastro />} />
       </Routes>
     </>

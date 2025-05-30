@@ -1,6 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle, FaCalendarAlt, FaGamepad, FaLayerGroup, FaLaptopCode, FaTrophy, FaChartBar, FaCrown, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import {
+  FaUserCircle, FaCalendarAlt, FaGamepad, FaLayerGroup,
+  FaLaptopCode, FaTrophy, FaChartBar, FaCrown,
+  FaChevronDown, FaChevronUp
+} from "react-icons/fa";
 import { useAuth } from "../components/AuthContext";
 
 const plataformas = [
@@ -53,72 +57,74 @@ const SearchCard = ({
   checkedPlataformas, setCheckedPlataformas,
   checkedGeneros, setCheckedGeneros,
   checkedDevs, setCheckedDevs,
-  bestOfYear,        // ✅ Novo prop recebido do pai
-  setBestOfYear      // ✅ Novo prop recebido do pai
+  bestOfYear, setBestOfYear,
+  popular2024, setPopular2024,
+  bestOfAllTime, setBestOfAllTime,
+  onShowAllGames,
 }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
-  // Plataformas
   const [showPlataformas, setShowPlataformas] = useState(false);
   const contentRefPlataformas = useRef(null);
   const [maxHeightPlataformas, setMaxHeightPlataformas] = useState("0px");
-  // REMOVA esta linha:
-  // const [checkedPlataformas, setCheckedPlataformas] = useState([]);
 
-  // Gêneros
   const [showGeneros, setShowGeneros] = useState(false);
   const contentRefGeneros = useRef(null);
   const [maxHeightGeneros, setMaxHeightGeneros] = useState("0px");
-  // REMOVA esta linha:
-  // const [checkedGeneros, setCheckedGeneros] = useState([]);
 
-  // Desenvolvedores
   const [showDevs, setShowDevs] = useState(false);
   const contentRefDevs = useRef(null);
   const [maxHeightDevs, setMaxHeightDevs] = useState("0px");
 
-  // Top hover animation
   const [hoveredTop, setHoveredTop] = useState(null);
-
-  // Hover para My Library
   const [hoveredLibrary, setHoveredLibrary] = useState(false);
 
- // Função para lidar com o clique no filtro "Melhor do Ano"
- const handleBestOfYearClick = () => {
+  const handleBestOfYearClick = () => {
   const newValue = !bestOfYear;
   setBestOfYear(newValue);
+  if (newValue) {
+    setPopular2024(false);
+    setBestOfAllTime(false);
+  }
+};
+
+const handlePopular2024Click = () => {
+  const newValue = !popular2024;
+  setPopular2024(newValue);
+  if (newValue) {
+    setBestOfYear(false);
+    setBestOfAllTime(false);
+  }
+};
+
+const handleBestOfAllTimeClick = () => {
+  const newValue = !bestOfAllTime;
+  setBestOfAllTime(newValue);
+  if (newValue) {
+    setBestOfYear(false);
+    setPopular2024(false);
+  }
 };
 
   useEffect(() => {
-    if (showPlataformas && contentRefPlataformas.current) {
-      setMaxHeightPlataformas(contentRefPlataformas.current.scrollHeight + "px");
-    } else {
-      setMaxHeightPlataformas("0px");
-    }
+    setMaxHeightPlataformas(showPlataformas && contentRefPlataformas.current
+      ? contentRefPlataformas.current.scrollHeight + "px" : "0px");
   }, [showPlataformas]);
 
   useEffect(() => {
-    if (showGeneros && contentRefGeneros.current) {
-      setMaxHeightGeneros(contentRefGeneros.current.scrollHeight + "px");
-    } else {
-      setMaxHeightGeneros("0px");
-    }
+    setMaxHeightGeneros(showGeneros && contentRefGeneros.current
+      ? contentRefGeneros.current.scrollHeight + "px" : "0px");
   }, [showGeneros]);
 
   useEffect(() => {
-    if (showDevs && contentRefDevs.current) {
-      setMaxHeightDevs(contentRefDevs.current.scrollHeight + "px");
-    } else {
-      setMaxHeightDevs("0px");
-    }
+    setMaxHeightDevs(showDevs && contentRefDevs.current
+      ? contentRefDevs.current.scrollHeight + "px" : "0px");
   }, [showDevs]);
 
   const handleCheck = (name, checkedList, setCheckedList) => {
     setCheckedList((prev) =>
-      prev.includes(name)
-        ? prev.filter((p) => p !== name)
-        : [...prev, name]
+      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
     );
   };
 
@@ -138,6 +144,7 @@ const SearchCard = ({
       top: "150px",
       boxShadow: "0 2px 16px rgba(0,0,0,0.25)",
     }}>
+      {/* Usuário */}
       <div style={{ display: "flex", alignItems: "center", gap: "18px", marginBottom: "12px" }}>
         <FaUserCircle size={54} />
         <div>
@@ -167,24 +174,22 @@ const SearchCard = ({
             </>
           ) : (
             <div style={{ fontSize: "19px" }}>
-              <span
-                style={{ marginRight: "18px", cursor: "pointer" }}
-                onClick={() => navigate("/login")}
-              >
+              <span style={{ marginRight: "18px", cursor: "pointer" }} onClick={() => navigate("/login")}>
                 Login
               </span>
-              <span
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate("/cadastro")}
-              >
+              <span style={{ cursor: "pointer" }} onClick={() => navigate("/cadastro")}>
                 Cadastro
               </span>
             </div>
           )}
         </div>
       </div>
+
       <hr style={{ border: "none", borderTop: "1px solid #444", margin: "10px 0" }} />
+
+      {/* Filtros */}
       <div style={{ fontWeight: "bold", fontSize: "20px", marginBottom: "4px" }}>Search list</div>
+
       <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
         {/* Plataformas */}
         <div
@@ -194,47 +199,30 @@ const SearchCard = ({
           <FaGamepad size={22} /> Plataformas
           {showPlataformas ? <FaChevronUp size={16} /> : <FaChevronDown size={16} />}
         </div>
-        <div
-          ref={contentRefPlataformas}
-          style={{
-            maxHeight: maxHeightPlataformas,
-            overflow: "hidden",
-            transition: "max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-            marginLeft: "38px",
-            marginTop: showPlataformas ? "6px" : "0",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px"
-          }}
-        >
+        <div ref={contentRefPlataformas} style={{
+          maxHeight: maxHeightPlataformas,
+          overflow: "hidden",
+          transition: "max-height 0.35s",
+          marginLeft: "38px",
+          display: "flex", flexDirection: "column", gap: "8px"
+        }}>
           {plataformas.map((plat) => (
-            <label
-              key={plat.name}
-              style={{
-                cursor: "pointer",
-                color: "#ccc",
-                fontSize: "16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                userSelect: "none"
-              }}
-            >
+            <label key={plat.name} style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              color: "#ccc", fontSize: "16px", userSelect: "none"
+            }}>
               <img src={plat.icon} alt={plat.name} style={{ width: 22, height: 22 }} />
               <span>{plat.name}</span>
               <input
                 type="checkbox"
                 checked={checkedPlataformas.includes(plat.name)}
                 onChange={() => handleCheck(plat.name, checkedPlataformas, setCheckedPlataformas)}
-                style={
-                  checkedPlataformas.includes(plat.name)
-                    ? checkedCheckboxStyle
-                    : customCheckboxStyle
-                }
+                style={checkedPlataformas.includes(plat.name) ? checkedCheckboxStyle : customCheckboxStyle}
               />
             </label>
           ))}
         </div>
+
         {/* Gêneros */}
         <div
           style={{ display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", fontSize: "18px" }}
@@ -243,47 +231,30 @@ const SearchCard = ({
           <FaLayerGroup size={22} /> Gênero
           {showGeneros ? <FaChevronUp size={16} /> : <FaChevronDown size={16} />}
         </div>
-        <div
-          ref={contentRefGeneros}
-          style={{
-            maxHeight: maxHeightGeneros,
-            overflow: "hidden",
-            transition: "max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-            marginLeft: "38px",
-            marginTop: showGeneros ? "6px" : "0",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px"
-          }}
-        >
+        <div ref={contentRefGeneros} style={{
+          maxHeight: maxHeightGeneros,
+          overflow: "hidden",
+          transition: "max-height 0.35s",
+          marginLeft: "38px",
+          display: "flex", flexDirection: "column", gap: "8px"
+        }}>
           {generos.map((gen) => (
-            <label
-              key={gen.name}
-              style={{
-                cursor: "pointer",
-                color: "#ccc",
-                fontSize: "16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                userSelect: "none"
-              }}
-            >
+            <label key={gen.name} style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              color: "#ccc", fontSize: "16px", userSelect: "none"
+            }}>
               <img src={gen.icon} alt={gen.name} style={{ width: 22, height: 22 }} />
               <span>{gen.name}</span>
               <input
                 type="checkbox"
                 checked={checkedGeneros.includes(gen.name)}
                 onChange={() => handleCheck(gen.name, checkedGeneros, setCheckedGeneros)}
-                style={
-                  checkedGeneros.includes(gen.name)
-                    ? checkedCheckboxStyle
-                    : customCheckboxStyle
-                }
+                style={checkedGeneros.includes(gen.name) ? checkedCheckboxStyle : customCheckboxStyle}
               />
             </label>
           ))}
         </div>
+
         {/* Desenvolvedores */}
         <div
           style={{ display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", fontSize: "18px" }}
@@ -292,60 +263,39 @@ const SearchCard = ({
           <FaLaptopCode size={22} /> Desenvolvedor
           {showDevs ? <FaChevronUp size={16} /> : <FaChevronDown size={16} />}
         </div>
-        <div
-          ref={contentRefDevs}
-          style={{
-            maxHeight: maxHeightDevs,
-            overflow: "hidden",
-            transition: "max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-            marginLeft: "38px",
-            marginTop: showDevs ? "6px" : "0",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px"
-          }}
-        >
+        <div ref={contentRefDevs} style={{
+          maxHeight: maxHeightDevs,
+          overflow: "hidden",
+          transition: "max-height 0.35s",
+          marginLeft: "38px",
+          display: "flex", flexDirection: "column", gap: "8px"
+        }}>
           {desenvolvedores.map((dev) => (
-            <label
-              key={dev.name}
-              style={{
-                cursor: "pointer",
-                color: "#ccc",
-                fontSize: "16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                userSelect: "none"
-              }}
-            >
+            <label key={dev.name} style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              color: "#ccc", fontSize: "16px", userSelect: "none"
+            }}>
               <img src={dev.icon} alt={dev.name} style={{ width: 22, height: 22 }} />
               <span>{dev.name}</span>
               <input
                 type="checkbox"
                 checked={checkedDevs.includes(dev.name)}
                 onChange={() => handleCheck(dev.name, checkedDevs, setCheckedDevs)}
-                style={
-                  checkedDevs.includes(dev.name)
-                    ? checkedCheckboxStyle
-                    : customCheckboxStyle
-                }
+                style={checkedDevs.includes(dev.name) ? checkedCheckboxStyle : customCheckboxStyle}
               />
             </label>
           ))}
         </div>
       </div>
+
+      {/* Top section */}
       <div style={{ fontWeight: "bold", fontSize: "20px", margin: "18px 0 4px 0" }}>Top</div>
       <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            cursor: "pointer",
-            fontSize: "18px",
-            transition: "transform 0.2s",
-            transform: hoveredTop === "ano" ? "scale(1.1)" : "scale(1)",
-            color: bestOfYear ? "#FFD700" : "#fff"  // muda a cor quando ativo
+            display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", fontSize: "18px",
+            transition: "transform 0.2s", transform: hoveredTop === "ano" ? "scale(1.1)" : "scale(1)",
+            color: bestOfYear ? "#FFD700" : "#fff"
           }}
           onClick={handleBestOfYearClick}
           onMouseEnter={() => setHoveredTop("ano")}
@@ -353,39 +303,44 @@ const SearchCard = ({
         >
           <FaTrophy size={22} /> Melhor do ano
         </div>
+
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            cursor: "pointer",
-            fontSize: "18px",
-            transition: "transform 0.2s",
-            transform: hoveredTop === "pop" ? "scale(1.1)" : "scale(1)"
+            display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", fontSize: "18px",
+            transition: "transform 0.2s", transform: hoveredTop === "pop" ? "scale(1.1)" : "scale(1)",
+            color: popular2024 ? "#FFD700" : "#fff"
           }}
+          onClick={handlePopular2024Click}
           onMouseEnter={() => setHoveredTop("pop")}
           onMouseLeave={() => setHoveredTop(null)}
         >
           <FaChartBar size={22} /> Populares de 2024
         </div>
+
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            cursor: "pointer",
-            fontSize: "18px",
-            transition: "transform 0.2s",
-            transform: hoveredTop === "sempre" ? "scale(1.1)" : "scale(1)"
+            display: "flex", alignItems: "center", gap: "16px", cursor: "pointer", fontSize: "18px",
+            transition: "transform 0.2s", transform: hoveredTop === "sempre" ? "scale(1.1)" : "scale(1)",
+            color: bestOfAllTime ? "#FFD700" : "#fff"
           }}
+          onClick={handleBestOfAllTimeClick}
           onMouseEnter={() => setHoveredTop("sempre")}
           onMouseLeave={() => setHoveredTop(null)}
         >
           <FaCrown size={22} /> melhores de sempre
         </div>
       </div>
+
       <hr style={{ border: "none", borderTop: "1px solid #444", margin: "10px 0" }} />
-      <div style={{ fontWeight: "bold", fontSize: "20px", cursor: "pointer" }}>Todos os jogos</div>
+        <div
+      style={{ fontWeight: "bold", fontSize: "20px", cursor: "pointer" }}
+      onClick={() => {
+        if (typeof onShowAllGames === "function") onShowAllGames();
+        navigate("/");
+      }}
+    >
+      Todos os jogos
+    </div>
     </aside>
   );
 };
