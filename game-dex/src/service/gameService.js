@@ -15,7 +15,7 @@ export async function listGames({ page = 1, page_size = 10 }) {
   return response.json();
 }
 
-export async function fetchGames({ page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear }) {
+export async function fetchGames({ page, checkedPlataformas, checkedGeneros, checkedDevs, searchTerm, bestOfYear, popular2024, bestOfAllTime }) {
   const generoSlugMap = {
     "Ação": "action",
     "Indie": "indie",
@@ -81,6 +81,12 @@ export async function fetchGames({ page, checkedPlataformas, checkedGeneros, che
   if (bestOfYear) {
     url += `&best_of_year=true`;
   }
+  if (popular2024) {
+    url += `&popular_2024=true`;
+  }
+  if (bestOfAllTime) {
+    url += `&best_of_all_time=true`;
+  }
 
   const response = await fetch(url);
   if (!response.ok) throw new Error("Erro na requisição");
@@ -104,5 +110,67 @@ export async function addGameToUser({ user, token, game }) {
     }),
   });
   if (!response.ok) throw new Error('Erro ao adicionar jogo.');
+  return response.json();
+}
+
+
+export async function updateUserGame({ userId, gameId, comment, rating, progress, status }) {
+  const response = await fetch(
+    `http://127.0.0.1:8000/api/users/${userId}/games/${gameId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        comment: comment || null,
+        rating: rating ? Number(rating) : null,
+        progress: progress || null,
+        status: status || null, // <-- Adicione esta linha
+      }),
+    }
+  );
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao atualizar jogo");
+  }
+  return response.json();
+}
+
+export async function removeUserGame({ userId, gameId }) {
+  const response = await fetch(
+    `http://127.0.0.1:8000/api/users/${userId}/games/${gameId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao remover jogo");
+  }
+  return true;
+}
+
+export async function fetchUserGameDetail({ userId, gameId }) {
+  const response = await fetch(
+    `http://127.0.0.1:8000/api/users/${userId}/games/${gameId}`
+  );
+  if (!response.ok) throw new Error("Erro ao buscar detalhes do jogo");
+  return response.json();
+}
+
+export async function fetchUserGames({ userId, token }) {
+  const response = await fetch(
+    `http://127.0.0.1:8000/api/users/${userId}/games`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!response.ok) throw new Error("Erro ao buscar jogos do usuário");
   return response.json();
 }

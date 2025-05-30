@@ -1,85 +1,82 @@
 import React from "react";
 import { useAuth } from "../components/AuthContext";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SearchCard from "../components/searchCard";
 import { FaSearch } from "react-icons/fa";
+import { fetchUserGameDetail, updateUserGame, removeUserGame } from "../service/gameService";
 
 function Infogame() {
   const { user } = useAuth();
-  const location = useLocation();
-  const game = location.state?.game;
-  console.log(game);
+  const { gameId } = useParams();
+  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = React.useState(false);
-  const [progress, setProgress] = React.useState(game?.progress || "");
-  const [rating, setRating] = React.useState(game?.rating || "");
-  const [comment, setComment] = React.useState(game?.comment || "");
+  const [gameData, setGameData] = React.useState(null);
+  const [status, setStatus] = React.useState("Jogando");
+  const [progress, setProgress] = React.useState("");
+  const [rating, setRating] = React.useState("");
+  const [comment, setComment] = React.useState("");
+
+  const backendToFrontendStatus = {
+    jogando: "Jogando",
+    jogado: "Jogado",
+    dropado: "Dropado",
+  };
+  const frontendToBackendStatus = {
+    "Jogando": "jogando",
+    "Jogado": "jogado",
+    "Dropado": "dropado",
+  };
+
+  // Busca os dados do jogo ao abrir a tela
+  React.useEffect(() => {
+    async function loadGame() {
+      const data = await fetchUserGameDetail({ userId: user.id, gameId });
+      setGameData(data.game);
+      setStatus(backendToFrontendStatus[data.status] || "Jogando");
+      setProgress(data.progress || "");
+      setRating(data.rating || "");
+      setComment(data.comment || "");
+    }
+    if (user && gameId) loadGame();
+  }, [user, gameId]);
+
+  const handleStatusChange = (e) => setStatus(e.target.value);
 
   const handleSave = async () => {
     try {
-      console.log("Request body:", {
-        comment: comment || null,
-        rating: rating ? Number(rating) : null,
-        progress: progress || null,
+      await updateUserGame({
+        userId: user.id,
+        gameId,
+        comment,
+        rating,
+        progress,
+        status: frontendToBackendStatus[status] || "jogando",
       });
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/users/${user.id}/games/${game.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            comment: comment || null,
-            rating: rating ? Number(rating) : null,
-            progress: progress || null,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Erro ao atualizar jogo");
-      }
-
-      const data = await response.json();
-      console.log("Atualizado com sucesso:", data);
       setIsEditing(false);
+      // Recarrega os dados atualizados do backend
+      const data = await fetchUserGameDetail({ userId: user.id, gameId });
+      setGameData(data.game);
+      setStatus(backendToFrontendStatus[data.status] || "Jogando");
+      setProgress(data.progress || "");
+      setRating(data.rating || "");
+      setComment(data.comment || "");
     } catch (error) {
       console.error("Erro:", error);
     }
   };
 
-
   const handleRemove = async () => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/users/${user.id}/games/${game.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Erro ao remover jogo");
-      }
-
-      const data = await response.json();
-      console.log("Jogo removido com sucesso:", data);
-
-      // Redirecionar ou atualizar a interface após a remoção
-      alert("Jogo removido com sucesso!");
-      window.location.href = "/meus-jogos"; // Redireciona para a página inicial
+      await removeUserGame({
+        userId: user.id,
+        gameId,
+      });
+      navigate("/meus-jogos");
     } catch (error) {
       console.error("Erro ao remover jogo:", error);
-      alert("Erro ao remover jogo. Tente novamente.");
     }
   };
-
 
   const platformImages = {
     xbox: "/platform-icons/icons8-xbox-50.png",
@@ -246,6 +243,16 @@ function Infogame() {
       padding: "8px",
       marginBottom: "10px",
     },
+    statusSelect: {
+      backgroundColor: "#2d2d2d",
+      color: "#FFD700",
+      border: "1px solid #444",
+      borderRadius: "6px",
+      padding: "8px",
+      marginBottom: "10px",
+      marginTop: "10px",
+      width: "180px",
+    },
   };
 
   return (
@@ -258,6 +265,7 @@ function Infogame() {
           setCheckedGeneros={() => {}}
           checkedDevs={[]}
           setCheckedDevs={() => {}}
+          onShowAllGames={() => {}}
         />
       </div>
       <main style={styles.content}>
@@ -275,17 +283,17 @@ function Infogame() {
         </div>
 
         {/* Detalhes do jogo */}
-        {game && (
+        {gameData && (
           <>
             <div style={{ ...styles.gameDetails }}>
               <img
-                src={game.background_img || "https://via.placeholder.com/200"}
-                alt={game.name || "Imagem do jogo"}
+                src={gameData.background_img || "https://via.placeholder.com/200"}
+                alt={gameData.name || "Imagem do jogo"}
                 style={styles.gameImage}
               />
               <div style={styles.gameInfo}>
                 <div style={styles.gameTitleRow}>
-                  <h3 style={styles.gameTitle}>{game.name}</h3>
+                  <h3 style={styles.gameTitle}>{gameData.name}</h3>
                   {!isEditing && (
                     <button
                       style={styles.editBtn}
@@ -310,8 +318,8 @@ function Infogame() {
                     Plataformas:
                   </span>
                   {(() => {
-                    const platformsArray = game.platforms
-                      ? game.platforms.split(",").map((p) => p.trim())
+                    const platformsArray = gameData.platforms
+                      ? gameData.platforms.split(",").map((p) => p.trim())
                       : [];
                     const uniquePlatforms = [];
                     const seen = new Set();
@@ -337,13 +345,31 @@ function Infogame() {
                 {/* Exibir a data de lançamento */}
                 <p style={styles.gameText}>
                   Data de lançamento:{" "}
-                  {game.release_date
-                    ? new Date(`${game.release_date}T00:00:00Z`).toLocaleDateString(
+                  {gameData.release_date
+                    ? new Date(`${gameData.release_date}T00:00:00Z`).toLocaleDateString(
                         "pt-BR",
                         { timeZone: "UTC" }
                       )
                     : "Desconhecida"}
                 </p>
+
+                {/* Exibir status */}
+                <div>
+                  <label style={{ marginRight: "8px" }}>Status:</label>
+                  {isEditing ? (
+                    <select
+                      value={status}
+                      onChange={handleStatusChange}
+                      style={styles.statusSelect}
+                    >
+                      <option value="Jogando">Jogando</option>
+                      <option value="Jogado">Jogado</option>
+                      <option value="Dropado">Dropado</option>
+                    </select>
+                  ) : (
+                    <span style={{ color: "#FFD700", fontWeight: "bold" }}>{status}</span>
+                  )}
+                </div>
 
                 {/* Exibir progresso */}
                 {isEditing ? (
@@ -414,22 +440,22 @@ function Infogame() {
               )}
             </div>
             <button
-            style={{
-              color: "#fff",
-              background: "#d9534f",
-              border: "none",
-              borderRadius: "6px",
-              padding: "6px 18px",
-              fontWeight: 500,
-              fontSize: "1rem",
-              cursor: "pointer",
-              marginTop: "12px",
-            }}
-            onClick={handleRemove}
-            title="Remover jogo"
-          >
-            Deletar
-          </button>
+              style={{
+                color: "#fff",
+                background: "#d9534f",
+                border: "none",
+                borderRadius: "6px",
+                padding: "6px 18px",
+                fontWeight: 500,
+                fontSize: "1rem",
+                cursor: "pointer",
+                marginTop: "12px",
+              }}
+              onClick={handleRemove}
+              title="Remover jogo"
+            >
+              Deletar
+            </button>
           </>
         )}
       </main>

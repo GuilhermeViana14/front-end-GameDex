@@ -42,8 +42,22 @@ const ListGames = ({ searchResults, loadingSearch }) => {
   const [checkedGeneros, setCheckedGeneros] = useState([]);
   const [checkedDevs, setCheckedDevs] = useState([]);
   const [bestOfYear, setBestOfYear] = useState(false);
+  const [popular2024, setPopular2024] = useState(false);
+  const [bestOfAllTime, setBestOfAllTime] = useState(false);
+  
   const styles = getStyles(windowWidth);
   const { token, user } = useAuth();
+
+const handleShowAllGames = () => {
+  setCheckedPlataformas([]);
+  setCheckedGeneros([]);
+  setCheckedDevs([]);
+  setBestOfYear(false);
+  setPopular2024(false);
+  setBestOfAllTime(false);
+  setPage(1);
+};
+
 
   // Resetar página ao trocar filtros
   useEffect(() => {
@@ -66,7 +80,9 @@ const ListGames = ({ searchResults, loadingSearch }) => {
     checkedPlataformas.length > 0 ||
     checkedGeneros.length > 0 ||
     checkedDevs.length > 0 ||
-    bestOfYear // <-- Adicione esta linha
+    bestOfYear ||
+    popular2024 ||
+    bestOfAllTime // <-- Adicione esta linha
   ) {
     fetchGames({
       page,
@@ -74,7 +90,9 @@ const ListGames = ({ searchResults, loadingSearch }) => {
       checkedGeneros,
       checkedDevs,
       searchTerm: "",
-      bestOfYear, // <-- Passe o novo filtro
+      bestOfYear,
+      popular2024,
+      bestOfAllTime // <-- Passe o novo filtro
     })
       .then((data) => {
         if (page === 1) {
@@ -102,7 +120,7 @@ const ListGames = ({ searchResults, loadingSearch }) => {
       })
       .catch(() => setError("Erro ao carregar jogos."))
       .finally(() => setLoading(false));
-  },  [page, checkedPlataformas, checkedGeneros, checkedDevs, searchResults, bestOfYear]);
+  },  [page, checkedPlataformas, checkedGeneros, checkedDevs, searchResults, bestOfYear, popular2024, bestOfAllTime]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -148,16 +166,21 @@ const ListGames = ({ searchResults, loadingSearch }) => {
   if ((loading || loadingSearch) && isInitialLoad) {
     return (
       <div>
-        <SearchCard
-          checkedPlataformas={checkedPlataformas}
-          setCheckedPlataformas={setCheckedPlataformas}
-          checkedGeneros={checkedGeneros}
-          setCheckedGeneros={setCheckedGeneros}
-          checkedDevs={checkedDevs}
-          setCheckedDevs={setCheckedDevs}
-          bestOfYear={bestOfYear}
-          setBestOfYear={setBestOfYear}
-        />
+         <SearchCard
+        checkedPlataformas={checkedPlataformas}
+        setCheckedPlataformas={setCheckedPlataformas}
+        checkedGeneros={checkedGeneros}
+        setCheckedGeneros={setCheckedGeneros}
+        checkedDevs={checkedDevs}
+        setCheckedDevs={setCheckedDevs}
+        bestOfYear={bestOfYear}
+        setBestOfYear={setBestOfYear}
+        popular2024={popular2024}
+        setPopular2024={setPopular2024}
+        bestOfAllTime={bestOfAllTime}
+        setBestOfAllTime={setBestOfAllTime}
+        onShowAllGames={handleShowAllGames} 
+      />
         <div style={styles.container}>
           <div
             style={{
@@ -181,16 +204,21 @@ const ListGames = ({ searchResults, loadingSearch }) => {
   if (Array.isArray(searchResults)) {
     return (
       <div>
-       <SearchCard
-          checkedPlataformas={checkedPlataformas}
-          setCheckedPlataformas={setCheckedPlataformas}
-          checkedGeneros={checkedGeneros}
-          setCheckedGeneros={setCheckedGeneros}
-          checkedDevs={checkedDevs}
-          setCheckedDevs={setCheckedDevs}
-          bestOfYear={bestOfYear}
-          setBestOfYear={setBestOfYear}
-        />
+        <SearchCard
+        checkedPlataformas={checkedPlataformas}
+        setCheckedPlataformas={setCheckedPlataformas}
+        checkedGeneros={checkedGeneros}
+        setCheckedGeneros={setCheckedGeneros}
+        checkedDevs={checkedDevs}
+        setCheckedDevs={setCheckedDevs}
+        bestOfYear={bestOfYear}
+        setBestOfYear={setBestOfYear}
+        popular2024={popular2024}
+        setPopular2024={setPopular2024}
+        bestOfAllTime={bestOfAllTime}
+        setBestOfAllTime={setBestOfAllTime}
+        onShowAllGames={handleShowAllGames} 
+      />
         <div style={styles.container}>
           {searchResults.length === 0 ? (
             <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: "40px", fontSize: "1.2rem", fontWeight: "bold" }}>
@@ -273,6 +301,11 @@ const ListGames = ({ searchResults, loadingSearch }) => {
         setCheckedDevs={setCheckedDevs}
         bestOfYear={bestOfYear}
         setBestOfYear={setBestOfYear}
+        popular2024={popular2024}
+        setPopular2024={setPopular2024}
+        bestOfAllTime={bestOfAllTime}
+        setBestOfAllTime={setBestOfAllTime}
+        onShowAllGames={handleShowAllGames} 
       />
       <div style={styles.container}>
         {error && (

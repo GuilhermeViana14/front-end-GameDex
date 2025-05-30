@@ -17,7 +17,7 @@ function AppContent() {
   const [loadingSearch, setLoadingSearch] = useState(false); 
   const location = useLocation();
 
-  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro" || location.pathname === "/reset-password";
+  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro" || location.pathname === "/reset-password" || location.pathname === "/forgotpassword";
 
 
   return (
@@ -48,7 +48,7 @@ function AppContent() {
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/meus-jogos" element={<MyGames />} />
-        <Route path="/infogame" element={<Infogame />} />
+        <Route path="/infogame/:gameId" element={<Infogame />} />
         <Route path="/confirmacao-cadastro" element={<ConfirmacaoCadastro />} />
       </Routes>
     </>

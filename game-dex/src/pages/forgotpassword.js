@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSendEmail = async () => {
     if (!email) {
@@ -13,7 +15,6 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      // Envia o e-mail como parâmetro de consulta
       const response = await fetch(`http://127.0.0.1:8000/api/forgot-password?email=${encodeURIComponent(email)}`, {
         method: 'POST',
       });
@@ -38,8 +39,24 @@ const ForgotPassword = () => {
     cursor: loading ? 'not-allowed' : 'pointer',
   };
 
+  const backButtonStyle = {
+    position: 'absolute',
+    top: '20px',
+    left: '20px',
+    backgroundColor: '#2C2C2C',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    padding: '10px 15px',
+    cursor: 'pointer',
+    fontSize: '1rem',
+  };
+
   return (
     <div style={styles.container}>
+      <button style={backButtonStyle} onClick={() => navigate('/login')}>
+        Voltar
+      </button>
       <div style={styles.card}>
         <h2 style={styles.title}>Recuperar Senha</h2>
         <div style={styles.inputGroup}>

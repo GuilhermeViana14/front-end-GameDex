@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../components/AuthContext";
 import SearchCard from "../components/searchCard";
 import { FaSearch } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // Importa o useNavigate para navegação
+import { useNavigate } from "react-router-dom";
+import { fetchUserGames } from "../service/gameService";
 
 const platformImages = {
   xbox: "/platform-icons/icons8-xbox-50.png",
@@ -13,6 +14,12 @@ const platformImages = {
   android: "/platform-icons/icons8-android-50.png",
   ios: "/platform-icons/icons8-ios-50.png",
   default: "/platform-icons/icons8-default-32.png",
+};
+
+const backendToFrontendStatus = {
+  jogando: "Jogando",
+  jogado: "Jogado",
+  dropado: "Dropado",
 };
 
 const getGridColumns = () => {
@@ -44,37 +51,19 @@ function MyGames() {
   const [checkedGeneros, setCheckedGeneros] = useState([]);
   const [checkedDevs, setCheckedDevs] = useState([]);
 
-
-  const getGridColumns = () => {
-    return "repeat(4, 1fr)";
-  };
-  
-  
-  const navigate = useNavigate(); // Inicializa o useNavigate para navegação
-   
-
-
-  useEffect(() => {
-    if (!user) return;
-    setLoading(true);
-    fetch(`http://127.0.0.1:8000/api/users/${user.id}/games`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao buscar jogos do usuário");
-        return res.json();
-      })
-      .then((data) => setGames(data.games))
-      .catch(() => setError("Erro ao carregar seus jogos."))
-      .finally(() => setLoading(false));
-  }, [user, token]);
-
-  // Filtro de busca na biblioteca pessoal
+  const navigate = useNavigate();
   const filteredGames = games.filter((game) =>
-    game.name.toLowerCase().includes(search.toLowerCase())
-  );
+  game.name.toLowerCase().includes(search.toLowerCase())
+);
+
+useEffect(() => {
+  if (!user) return;
+  setLoading(true);
+  fetchUserGames({ userId: user.id, token })
+    .then((data) => setGames(data.games))
+    .catch(() => setError("Erro ao carregar seus jogos."))
+    .finally(() => setLoading(false));
+}, [user, token]);
 
   const styles = {
     content: {
@@ -165,6 +154,29 @@ function MyGames() {
       lineHeight: "1.2",
       wordBreak: "break-word",
     },
+    status: {
+      marginTop: "8px",
+      color: "#FFD700",
+      fontWeight: "bold",
+      fontSize: "0.95rem",
+    },
+    statusBadge: {
+      display: "inline-block",
+      padding: "2px 14px",
+      borderRadius: "20px",
+      background: "#232323",
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: "0.95rem",
+      textAlign: "center",
+      border: "2px solid #fff",
+      marginTop: "8px",
+      marginBottom: "4px",
+      letterSpacing: "1px",
+      minWidth: "0",
+      width: "fit-content",
+      boxSizing: "border-box",
+    },
   };
 
   return (
@@ -226,13 +238,16 @@ function MyGames() {
                 }
               });
 
+              // Usa o status do backend, convertido para exibição amigável
+              const status = backendToFrontendStatus[game.status] || "Jogando";
+
               return (
                 <div
                   key={game.id}
                   style={styles.gameCard(hoveredCard === game.id)}
                   onMouseEnter={() => setHoveredCard(game.id)}
                   onMouseLeave={() => setHoveredCard(null)}
-                  onClick={() => navigate("/infogame", { state: { game } })} // Navega para a página Infogame
+                  onClick={() => navigate(`/infogame/${game.id}`)}
                 >
                   <img
                     src={game.background_img}
@@ -251,6 +266,9 @@ function MyGames() {
                       ))}
                     </div>
                     <div style={styles.gameTitle}>{game.name}</div>
+                    <div style={styles.statusBadge}>
+                      {status}
+                    </div>
                   </div>
                 </div>
               );
