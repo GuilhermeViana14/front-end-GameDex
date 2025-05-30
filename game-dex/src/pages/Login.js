@@ -32,7 +32,6 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        // Ajuste: use access_token como token
         login({ user: data.user, token: data.access_token });
         alert('Login realizado com sucesso!');
         navigate('/');
@@ -170,7 +169,12 @@ function Login() {
                 value={formData.senha}
                 onChange={handleChange}
               />
-              <p style={forgotPasswordStyle}>Esqueceu a senha?</p>
+              <p
+                style={forgotPasswordStyle}
+                onClick={() => navigate('/forgotpassword')}
+              >
+                Esqueceu a senha?
+              </p>
             </div>
             <button type="submit" style={loginButtonStyle}>
               Login

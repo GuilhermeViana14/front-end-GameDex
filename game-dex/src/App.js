@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import Home from './pages/home';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
+import ForgotPassword from './pages/forgotpassword';
+import ResetPassword from './pages/resetpassword';
 import { AuthProvider } from './components/AuthContext';
 import MyGames from './pages/Mygames';
 import Infogame from './pages/Infogame';
@@ -14,7 +16,8 @@ function AppContent() {
   const [searchResults, setSearchResults] = useState(null);
   const [loadingSearch, setLoadingSearch] = useState(false); 
   const location = useLocation();
-  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro";
+
+  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro" || location.pathname === "/reset-password";
 
 
   return (
@@ -42,6 +45,8 @@ function AppContent() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/forgotpassword" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/meus-jogos" element={<MyGames />} />
         <Route path="/infogame" element={<Infogame />} />
         <Route path="/confirmacao-cadastro" element={<ConfirmacaoCadastro />} />
