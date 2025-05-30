@@ -9,13 +9,16 @@ import { AuthProvider } from './components/AuthContext';
 import MyGames from './pages/Mygames';
 import Infogame from './pages/Infogame';
 import Header from './components/Header';
+import ConfirmacaoCadastro from './pages/confirmacao_cadastro';
 
 function AppContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loadingSearch, setLoadingSearch] = useState(false); 
   const location = useLocation();
-  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro" || location.pathname === "/forgotpassword" || location.pathname === "/reset-password";
+
+  const hideHeader = location.pathname === "/login" || location.pathname === "/cadastro"|| location.pathname === "/confirmacao-cadastro" || location.pathname === "/reset-password";
+
 
   return (
     <>
@@ -46,6 +49,7 @@ function AppContent() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/meus-jogos" element={<MyGames />} />
         <Route path="/infogame" element={<Infogame />} />
+        <Route path="/confirmacao-cadastro" element={<ConfirmacaoCadastro />} />
       </Routes>
     </>
   );

@@ -1,9 +1,12 @@
+
+
 export async function searchGamesByName({ name, page = 1, page_size = 10 }) {
   const url = `http://127.0.0.1:8000/api/games/search?name=${encodeURIComponent(name)}&page=${page}&page_size=${page_size}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("Erro na busca por nome");
   return response.json();
 }
+
 
 export async function listGames({ page = 1, page_size = 10 }) {
   const url = `http://127.0.0.1:8000/api/games?page=${page}&page_size=${page_size}`;
